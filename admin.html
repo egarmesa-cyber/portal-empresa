@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Zona Mixta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen p-4">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
+            <div>
+                <h1 class="text-2xl font-black text-slate-800">Panel de Control</h1>
+                <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Registros de Empleados</p>
+            </div>
+            <button onclick="cargarRegistros()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition">↻ Actualizar</button>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-emerald-500 p-6 rounded-2xl text-white shadow-lg">
+                <p class="text-xs font-bold uppercase opacity-80">Hoy</p>
+                <h3 id="total-hoy" class="text-3xl font-black">--</h3>
+                <p class="text-[10px] mt-1">Fichajes totales</p>
+            </div>
+            <button onclick="exportarExcel()" class="bg-slate-800 p-6 rounded-2xl text-white shadow-lg flex flex-col justify-center items-center">
+                <span class="text-xl">📊</span>
+                <span class="text-xs font-bold uppercase mt-1 text-center">Exportar Datos</span>
+            </button>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Empleado</th>
+                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Acción</th>
+                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Hora Local</th>
+                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Mapa</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-cuerpo" class="text-slate-600">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function cargarRegistros() {
+            const cuerpo = document.getElementById('tabla-cuerpo');
+            cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center">Cargando datos...</td></tr>';
+
+            const { data, error } = await _supabase
+                .from('fichajes')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                alert("Error: " + error.message);
+                return;
+            }
+
+            cuerpo.innerHTML = '';
+            document.getElementById('total-hoy').innerText = data.length;
+
+            data.forEach(reg => {
+                const fila = document.createElement('tr');
+                fila.className = "border-b border-slate-50 hover:bg-slate-50 transition";
+                
+                // Formatear la hora local si no existe la columna Hora_Local
+                const horaMostrada = reg.Hora_Local || new Date(reg.created_at).toLocaleTimeString();
+                
+                // Crear botón de mapa si hay coordenadas
+                const mapaLink = reg.Ubicacion ? 
+                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="text-blue-500 font-bold text-xs underline">📍 Ver</a>` : 
+                    '<span class="text-slate-300 text-[10px]">Sin GPS</span>';
+
+                fila.innerHTML = `
+                    <td class="p-4 font-bold text-slate-800">${reg.Usuario}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded-lg text-[10px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+                            ${reg.Tipo}
+                        </span>
+                    </td>
+                    <td class="p-4 text-sm">${horaMostrada}</td>
+                    <td class="p-4">${mapaLink}</td>
+                `;
+                cuerpo.appendChild(fila);
+            });
+        }
+
+        function exportarExcel() {
+            alert("Esta función generará un archivo CSV con todos los fichajes. (Próximamente)");
+        }
+
+        // Cargar al iniciar
+        cargarRegistros();
+    </script>
+</body>
+</html>
