@@ -78,7 +78,7 @@
             try {
                 const { error } = await _supabase
                     .from('fichajes')
-                    .insert([{ usuario: currentUser, tipo: tipo }]);
+                    .insert([{ Usuario: currentUser, Tipo: tipo }]);
 
                 if (error) throw error;
 
