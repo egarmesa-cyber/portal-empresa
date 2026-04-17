@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Empresa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+    <header class="w-full max-w-md bg-white shadow-md rounded-lg p-6 mb-6 text-center">
+        <h1 class="text-2xl font-bold text-blue-600">Portal Empresa</h1>
+        <p class="text-gray-500" id="fecha"></p>
+    </header>
+
+    <main class="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-center">Control de Asistencia</h2>
+        <div id="status" class="text-center mb-6 p-3 bg-yellow-100 text-yellow-700 rounded text-sm font-medium">
+            Estado: No has fichado hoy
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="fichar('ENTRADA')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg shadow transition">
+                ENTRADA
+            </button>
+            <button onclick="fichar('SALIDA')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg shadow transition">
+                SALIDA
+            </button>
+        </div>
+    </main>
+
+    <section class="w-full max-w-md mt-6">
+        <h3 class="text-lg font-bold mb-2">Anuncios</h3>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+            <p class="text-sm text-blue-700 font-bold">¡Bienvenido al nuevo portal!</p>
+            <p class="text-xs text-blue-600">Recuerda subir tus facturas antes del viernes.</p>
+        </div>
+    </section>
+
+    <script>
+        // Mostrar fecha actual
+        document.getElementById('fecha').innerText = new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+
+        function fichar(tipo) {
+            const hora = new Date().toLocaleTimeString();
+            const statusDiv = document.getElementById('status');
+            
+            if(tipo === 'ENTRADA') {
+                statusDiv.className = "text-center mb-6 p-3 bg-green-100 text-green-700 rounded text-sm font-medium";
+                statusDiv.innerText = "✓ Entrada registrada a las " + hora;
+            } else {
+                statusDiv.className = "text-center mb-6 p-3 bg-red-100 text-red-700 rounded text-sm font-medium";
+                statusDiv.innerText = "✕ Salida registrada a las " + hora;
+            }
+            
+            alert(`${tipo} registrada con éxito`);
+        }
+    </script>
+</body>
+</html>
