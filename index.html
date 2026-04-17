@@ -5,57 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Empresa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center font-sans">
 
-    <header class="w-full max-w-md bg-white shadow-md rounded-lg p-6 mb-6 text-center">
-        <h1 class="text-2xl font-bold text-blue-600">Portal Empresa</h1>
-        <p class="text-gray-500" id="fecha"></p>
-    </header>
+    <div id="login-section" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl mt-10">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Identificación</h2>
+        <p class="text-sm text-gray-500 mb-4 text-center">Introduce tu nombre para fichar</p>
+        <input type="text" id="username" placeholder="Ej: Juan Pérez" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-lg">Entrar al Portal</button>
+    </div>
 
-    <main class="w-full max-w-md bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-center">Control de Asistencia</h2>
-        <div id="status" class="text-center mb-6 p-3 bg-yellow-100 text-yellow-700 rounded text-sm font-medium">
-            Estado: No has fichado hoy
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-            <button onclick="fichar('ENTRADA')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg shadow transition">
-                ENTRADA
-            </button>
-            <button onclick="fichar('SALIDA')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg shadow transition">
-                SALIDA
-            </button>
-        </div>
-    </main>
+    <div id="app-section" class="hidden w-full max-w-md mt-6">
+        <header class="bg-white p-6 rounded-2xl shadow-md mb-6 text-center border-b-4 border-blue-500">
+            <h1 class="text-xl font-bold text-gray-800">Hola, <span id="user-display" class="text-blue-600"></span></h1>
+            <button onclick="logout()" class="text-xs text-red-500 hover:underline mt-2">Cerrar sesión</button>
+        </header>
 
-    <section class="w-full max-w-md mt-6">
-        <h3 class="text-lg font-bold mb-2">Anuncios</h3>
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
-            <p class="text-sm text-blue-700 font-bold">¡Bienvenido al nuevo portal!</p>
-            <p class="text-xs text-blue-600">Recuerda subir tus facturas antes del viernes.</p>
+        <main class="bg-white p-8 rounded-2xl shadow-md">
+            <h2 class="text-center text-gray-600 mb-6 font-medium">Control de Horario</h2>
+            <div id="status" class="text-center mb-8 p-4 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold border border-blue-100">
+                Listo para registrar
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-xl shadow-md transition-all active:scale-95 text-lg">
+                    ▲ FICHAR ENTRADA
+                </button>
+                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white font-black py-5 rounded-xl shadow-md transition-all active:scale-95 text-lg">
+                    ▼ FICHAR SALIDA
+                </button>
+            </div>
+        </main>
+
+        <div class="mt-8 text-center text-gray-400 text-xs">
+            Portal Corporativo v1.0 • Conectado a Supabase
         </div>
-    </section>
+    </div>
 
     <script>
-        // Mostrar fecha actual
-        document.getElementById('fecha').innerText = new Date().toLocaleDateString('es-ES', { 
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-        });
+        // CONFIGURACIÓN DE TU BASE DE DATOS
+        const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function fichar(tipo) {
-            const hora = new Date().toLocaleTimeString();
-            const statusDiv = document.getElementById('status');
-            
-            if(tipo === 'ENTRADA') {
-                statusDiv.className = "text-center mb-6 p-3 bg-green-100 text-green-700 rounded text-sm font-medium";
-                statusDiv.innerText = "✓ Entrada registrada a las " + hora;
+        let currentUser = localStorage.getItem('usuario_empresa');
+
+        // Al cargar, verificar si ya estaba logueado
+        if(currentUser) { mostrarApp(); }
+
+        function login() {
+            const name = document.getElementById('username').value.trim();
+            if(name.length > 2) {
+                localStorage.setItem('usuario_empresa', name);
+                currentUser = name;
+                mostrarApp();
             } else {
-                statusDiv.className = "text-center mb-6 p-3 bg-red-100 text-red-700 rounded text-sm font-medium";
-                statusDiv.innerText = "✕ Salida registrada a las " + hora;
+                alert("Por favor, introduce un nombre válido.");
             }
+        }
+
+        function mostrarApp() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('app-section').classList.remove('hidden');
+            document.getElementById('user-display').innerText = currentUser;
+        }
+
+        async function fichar(tipo) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "Registrando...";
             
-            alert(`${tipo} registrada con éxito`);
+            try {
+                const { error } = await _supabase
+                    .from('fichajes')
+                    .insert([{ usuario: currentUser, tipo: tipo }]);
+
+                if (error) throw error;
+
+                const hora = new Date().toLocaleTimeString();
+                statusDiv.innerText = `✅ ${tipo} registrada a las ${hora}`;
+                statusDiv.className = "text-center mb-8 p-4 bg-green-100 text-green-700 rounded-xl text-sm font-bold border border-green-200";
+            } catch (err) {
+                alert("Error al conectar con la base de datos. Revisa si la tabla 'fichajes' existe.");
+                statusDiv.innerText = "Error de conexión";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario_empresa');
+            location.reload();
         }
     </script>
 </body>
