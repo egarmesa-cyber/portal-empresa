@@ -3,55 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Empresa</title>
+    <title>Portal Zona Mixta</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center font-sans">
+<body class="bg-gray-50 min-h-screen font-sans">
 
-    <div id="login-section" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl mt-10">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Identificación</h2>
-        <p class="text-sm text-gray-500 mb-4 text-center">Introduce tu nombre para fichar</p>
-        <input type="text" id="username" placeholder="Ej: Juan Pérez" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-lg">Entrar al Portal</button>
-    </div>
-
-    <div id="app-section" class="hidden w-full max-w-md mt-6">
-        <header class="bg-white p-6 rounded-2xl shadow-md mb-6 text-center border-b-4 border-blue-500">
-            <h1 class="text-xl font-bold text-gray-800">Hola, <span id="user-display" class="text-blue-600"></span></h1>
-            <button onclick="logout()" class="text-xs text-red-500 hover:underline mt-2">Cerrar sesión</button>
-        </header>
-
-        <main class="bg-white p-8 rounded-2xl shadow-md">
-            <h2 class="text-center text-gray-600 mb-6 font-medium">Control de Horario</h2>
-            <div id="status" class="text-center mb-8 p-4 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold border border-blue-100">
-                Listo para registrar
+    <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-2xl">ZM</span>
+                </div>
+                <h2 class="text-2xl font-black text-gray-800">Zona Mixta</h2>
+                <p class="text-gray-400 text-sm">Portal del Empleado</p>
             </div>
-            
-            <div class="grid grid-cols-1 gap-4">
-                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-xl shadow-md transition-all active:scale-95 text-lg">
-                    ▲ FICHAR ENTRADA
-                </button>
-                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white font-black py-5 rounded-xl shadow-md transition-all active:scale-95 text-lg">
-                    ▼ FICHAR SALIDA
-                </button>
-            </div>
-        </main>
-
-        <div class="mt-8 text-center text-gray-400 text-xs">
-            Portal Corporativo v1.0 • Conectado a Supabase
+            <input type="text" id="username" placeholder="Tu nombre" class="w-full p-4 bg-gray-50 border-none rounded-2xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-lg transition-all">Entrar</button>
         </div>
     </div>
 
+    <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-20">
+        <header class="flex justify-between items-center py-6">
+            <div>
+                <h1 class="text-xl font-black text-gray-800">Hola, <span id="user-display" class="text-blue-600"></span></h1>
+                <p id="fecha" class="text-xs text-gray-400 font-medium uppercase tracking-widest"></p>
+            </div>
+            <button onclick="logout()" class="bg-gray-200 p-2 rounded-full text-gray-500 text-xs px-4 font-bold">Salir</button>
+        </header>
+
+        <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 shadow-xl mb-8 text-white relative overflow-hidden">
+            <h3 class="font-bold mb-1 opacity-90 italic">Anuncio del día</h3>
+            <p id="muro-texto" class="text-lg font-medium">Bienvenidos al nuevo portal. ¡No olvidéis registrar vuestra entrada!</p>
+            <div class="absolute -right-4 -bottom-4 bg-white opacity-10 w-24 h-24 rounded-full"></div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-6 text-center">
+            <div id="status" class="mb-6 text-sm font-bold text-gray-400 uppercase tracking-widest">Listo para fichar</div>
+            <div class="grid grid-cols-1 gap-6">
+                <button onclick="fichar('ENTRADA')" class="group relative bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
+                    ENTRADA
+                </button>
+                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
+                    SALIDA
+                </button>
+            </div>
+        </div>
+
+        <p class="text-center text-[10px] text-gray-300 uppercase font-bold tracking-[0.2em]">Geolocalización Activa</p>
+    </div>
+
     <script>
-        // CONFIGURACIÓN DE TU BASE DE DATOS
         const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = localStorage.getItem('usuario_empresa');
-
-        // Al cargar, verificar si ya estaba logueado
         if(currentUser) { mostrarApp(); }
 
         function login() {
@@ -60,8 +69,6 @@
                 localStorage.setItem('usuario_empresa', name);
                 currentUser = name;
                 mostrarApp();
-            } else {
-                alert("Por favor, introduce un nombre válido.");
             }
         }
 
@@ -69,26 +76,33 @@
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('user-display').innerText = currentUser;
+            document.getElementById('fecha').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
         }
 
         async function fichar(tipo) {
             const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "Registrando...";
-            
-            try {
+            statusDiv.innerText = "Localizando y enviando...";
+
+            // GEOLOCALIZACIÓN
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                const coords = `${lat}, ${lon}`;
+
                 const { error } = await _supabase
                     .from('fichajes')
-                    .insert([{ Usuario: currentUser, Tipo: tipo }]);
+                    .insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]); // Asegúrate de añadir la columna 'Ubicacion' en Supabase si quieres verla
 
-                if (error) throw error;
-
-                const hora = new Date().toLocaleTimeString();
-                statusDiv.innerText = `✅ ${tipo} registrada a las ${hora}`;
-                statusDiv.className = "text-center mb-8 p-4 bg-green-100 text-green-700 rounded-xl text-sm font-bold border border-green-200";
-            } catch (err) {
-                alert("Error al conectar con la base de datos. Revisa si la tabla 'fichajes' existe.");
-                statusDiv.innerText = "Error de conexión";
-            }
+                if (error) {
+                    alert("Error: " + error.message);
+                } else {
+                    statusDiv.innerText = `✅ ${tipo} GUARDADA (${new Date().toLocaleTimeString()})`;
+                    statusDiv.classList.add('text-emerald-500');
+                }
+            }, (err) => {
+                alert("Debes activar el GPS para fichar.");
+                statusDiv.innerText = "Error: GPS necesario";
+            });
         }
 
         function logout() {
