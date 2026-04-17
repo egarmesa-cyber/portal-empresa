@@ -14,14 +14,19 @@
     <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100">
             <div class="text-center mb-8">
-               <div class="mx-auto mb-4 flex justify-center">
-    <img src="logo.png" alt="Logo Zona Mixta" class="h-24 w-auto object-contain drop-shadow-md">
-</div>
+                <div class="mx-auto mb-4 flex justify-center">
+                    <img src="logo.png" alt="Logo Zona Mixta" class="h-24 w-auto object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/150?text=Logo+ZM'">
+                </div>
                 <h2 class="text-2xl font-black text-gray-800">Zona Mixta</h2>
-                <p class="text-gray-400 text-sm">Portal del Empleado</p>
+                <p class="text-gray-400 text-sm italic">Acceso con PIN de Seguridad</p>
             </div>
-            <input type="text" id="username" placeholder="Tu nombre" class="w-full p-4 bg-gray-50 border-none rounded-2xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
-            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-lg transition-all">Entrar</button>
+            
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="Nombre de empleado" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold">
+                <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-lg transition-all active:scale-95">
+                    IDENTIFICARSE
+                </button>
+            </div>
         </div>
     </div>
 
@@ -36,14 +41,13 @@
 
         <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 shadow-xl mb-8 text-white relative overflow-hidden">
             <h3 class="font-bold mb-1 opacity-90 italic">Anuncio del día</h3>
-            <p id="muro-texto" class="text-lg font-medium">Bienvenidos al nuevo portal. ¡No olvidéis registrar vuestra entrada!</p>
-            <div class="absolute -right-4 -bottom-4 bg-white opacity-10 w-24 h-24 rounded-full"></div>
+            <p id="muro-texto" class="text-lg font-medium">¡Bienvenidos! Recordad fichar vuestra jornada y activar el GPS.</p>
         </div>
 
         <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-6 text-center">
-            <div id="status" class="mb-6 text-sm font-bold text-gray-400 uppercase tracking-widest">Listo para fichar</div>
+            <div id="status" class="mb-6 text-sm font-bold text-gray-400 uppercase tracking-widest">Listo para registrar</div>
             <div class="grid grid-cols-1 gap-6">
-                <button onclick="fichar('ENTRADA')" class="group relative bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
+                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
                     ENTRADA
                 </button>
                 <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
@@ -52,10 +56,11 @@
             </div>
         </div>
 
-        <p class="text-center text-[10px] text-gray-300 uppercase font-bold tracking-[0.2em]">Geolocalización Activa</p>
+        <p class="text-center text-[10px] text-gray-300 uppercase font-bold tracking-[0.2em]">🔒 Conexión Segura & GPS Activo</p>
     </div>
 
     <script>
+        // CONFIGURACIÓN SUPABASE
         const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -63,9 +68,25 @@
         let currentUser = localStorage.getItem('usuario_empresa');
         if(currentUser) { mostrarApp(); }
 
-        function login() {
+        // LOGIN CON PIN
+        async function login() {
             const name = document.getElementById('username').value.trim();
-            if(name.length > 2) {
+            if (!name) return alert("Por favor, introduce tu nombre");
+
+            const pinInput = prompt("Introduce tu PIN de 4 dígitos:"); 
+            if (!pinInput) return;
+
+            // Consultamos la tabla de usuarios
+            const { data, error } = await _supabase
+                .from('usuarios')
+                .select('*')
+                .eq('Nombre', name)
+                .eq('Pin', pinInput)
+                .single();
+
+            if (error || !data) {
+                alert("❌ ACCESO DENEGADO: Nombre o PIN incorrectos.");
+            } else {
                 localStorage.setItem('usuario_empresa', name);
                 currentUser = name;
                 mostrarApp();
@@ -81,26 +102,28 @@
 
         async function fichar(tipo) {
             const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "Localizando y enviando...";
+            statusDiv.innerText = "Localizando...";
 
-            // GEOLOCALIZACIÓN
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                const coords = `${lat}, ${lon}`;
-
+                const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+                
                 const { error } = await _supabase
                     .from('fichajes')
-                    .insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]); // Asegúrate de añadir la columna 'Ubicacion' en Supabase si quieres verla
+                    .insert([{ 
+                        Usuario: currentUser, 
+                        Tipo: tipo, 
+                        Ubicacion: coords,
+                        Hora_Local: new Date().toLocaleTimeString('es-ES') 
+                    }]);
 
                 if (error) {
                     alert("Error: " + error.message);
                 } else {
-                    statusDiv.innerText = `✅ ${tipo} GUARDADA (${new Date().toLocaleTimeString()})`;
-                    statusDiv.classList.add('text-emerald-500');
+                    statusDiv.innerText = `✅ ${tipo} GUARDADA A LAS ${new Date().toLocaleTimeString()}`;
+                    statusDiv.className = "mb-6 text-sm font-bold text-emerald-500 uppercase tracking-widest";
                 }
             }, (err) => {
-                alert("Debes activar el GPS para fichar.");
+                alert("Debes permitir el acceso al GPS para fichar.");
                 statusDiv.innerText = "Error: GPS necesario";
             });
         }
