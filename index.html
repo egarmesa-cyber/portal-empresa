@@ -222,4 +222,43 @@
 
         async function cargarHistorial() {
             const lista = document.getElementById('historial-lista');
-            const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(3
+            const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(3);
+            if (data && data.length > 0) {
+                lista.innerHTML = data.map(f => `
+                    <div class="flex justify-between items-center bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm">
+                        <span class="text-[10px] font-black ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} uppercase italic">${f.Tipo}</span>
+                        <span class="text-xs font-black text-slate-600">${new Date(f.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                `).join('');
+                if (data[0].Tipo === 'ENTRADA') { iniciarCronometro(data[0].created_at); }
+                else { document.getElementById('cronometro-box').classList.add('hidden'); clearInterval(timerInterval); }
+            }
+        }
+
+        function iniciarCronometro(horaEntrada) {
+            const display = document.getElementById('tiempo-transcurrido');
+            document.getElementById('cronometro-box').classList.remove('hidden');
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const diff = new Date() - new Date(horaEntrada);
+                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                display.innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        async function fichar(tipo) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "LOCALIZANDO...";
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+                const { error } = await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]);
+                if (!error) { statusDiv.innerText = "¡OK! REGISTRADO ✅"; cargarHistorial(); }
+            }, () => alert("GPS Obligatorio para fichar"));
+        }
+
+        function logout() { localStorage.removeItem('usuario_empresa'); location.reload(); }
+    </script>
+</body>
+</html>
