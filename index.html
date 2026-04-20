@@ -2,17 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zona Mixta Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .trabajando { animation: pulse-soft 2s infinite; }
-        .chat-container { height: 65vh; overflow-y: auto; scroll-behavior: smooth; }
+        .chat-container { height: 60vh; overflow-y: auto; scroll-behavior: smooth; }
+        /* Evitar scroll lateral */
+        body { overflow-x: hidden; touch-action: manipulation; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans text-slate-900 overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
 
     <div id="side-menu" class="fixed inset-0 z-50 translate-x-full transition-transform duration-300 ease-in-out">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleMenu()"></div>
@@ -21,74 +23,203 @@
             <div class="space-y-8 flex-1">
                 <div>
                     <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Comunicación</h3>
-                    <button onclick="abrirChat()" class="flex items-center gap-4 font-bold text-slate-700 hover:text-blue-600 w-full transition-all">
-                        <span class="bg-blue-50 p-2 rounded-xl text-lg">💬</span> Chat de Equipo
+                    <button onclick="abrirChat()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
+                        <span class="bg-blue-50 p-3 rounded-xl text-xl">💬</span> Chat de Equipo
                     </button>
                 </div>
                 <div>
                     <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Gestión</h3>
-                    <button onclick="abrirDocumentos()" class="flex items-center gap-4 font-bold text-slate-700 hover:text-blue-600 w-full transition-all">
-                        <span class="bg-slate-100 p-2 rounded-xl text-lg">📁</span> Mis Documentos
+                    <button onclick="abrirDocumentos()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
+                        <span class="bg-slate-100 p-3 rounded-xl text-xl">📁</span> Mis Documentos
                     </button>
                 </div>
             </div>
-            <button onclick="logout()" class="mt-auto flex items-center gap-4 font-black text-rose-500 uppercase text-[10px] tracking-widest">
-                <span class="bg-rose-50 p-2 rounded-lg text-base">🚪</span> Salir de la App
+            <button onclick="logout()" class="mt-auto flex items-center gap-4 font-black text-rose-500 uppercase text-[10px] tracking-widest p-4 bg-rose-50 rounded-2xl">
+                <span>🚪</span> Salir de la App
             </button>
         </div>
     </div>
 
     <div id="chat-window" class="fixed inset-0 z-[60] bg-white translate-y-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="p-5 border-b flex justify-between items-center bg-blue-600 text-white shadow-lg">
-            <div class="flex items-center gap-2">
-                <span class="text-xl">💬</span>
-                <h2 class="font-black italic uppercase tracking-tighter">Chat Zona Mixta</h2>
-            </div>
-            <button onclick="cerrarChat()" class="font-black text-[10px] bg-white/20 px-3 py-1 rounded-full uppercase">Cerrar</button>
+            <h2 class="font-black italic uppercase tracking-tighter flex items-center gap-2">
+                <span>💬</span> Chat Zona Mixta
+            </h2>
+            <button onclick="cerrarChat()" class="font-black text-[10px] bg-white/20 px-4 py-2 rounded-full uppercase">Volver</button>
         </div>
-        <div id="chat-mensajes" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 chat-container">
-            </div>
-        <div class="p-4 border-t bg-white flex gap-2 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-            <input type="text" id="chat-input" placeholder="Escribe al equipo..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none font-medium focus:ring-2 focus:ring-blue-500">
-            <button onclick="enviarMensaje()" class="bg-blue-600 text-white px-6 rounded-2xl font-black uppercase text-xs active:scale-95 transition-all">Enviar</button>
+        <div id="chat-mensajes" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 chat-container"></div>
+        <div class="p-4 border-t bg-white flex gap-2">
+            <input type="text" id="chat-input" placeholder="Escribe al equipo..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none font-medium">
+            <button onclick="enviarMensaje()" class="bg-blue-600 text-white px-6 rounded-2xl font-black uppercase text-[10px]">Enviar</button>
         </div>
     </div>
 
-    <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-xl w-full max-w-sm border border-slate-100 text-center">
-            <img src="logo.png" class="h-24 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter">Zona Mixta</h2>
-            <p class="text-slate-400 text-[10px] mb-8 font-black uppercase tracking-[0.3em] text-blue-600">Acceso Personal</p>
-            <input type="text" id="username" placeholder="Tu Nombre" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 text-center font-bold outline-none focus:ring-2 focus:ring-blue-600">
-            <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-lg active:scale-95 transition-all">ENTRAR</button>
+    <div id="login-section" class="flex items-center justify-center min-h-screen p-6">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border border-slate-100 text-center">
+            <img src="logo.png" class="h-28 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
+            <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Zona Mixta</h2>
+            <p class="text-blue-600 text-[10px] mb-10 font-black uppercase tracking-[0.3em]">Portal del Empleado</p>
+            
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="Nombre de Usuario" class="w-full p-5 bg-slate-50 rounded-2xl text-center font-bold outline-none focus:ring-2 focus:ring-blue-600 border border-slate-100">
+                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all text-sm uppercase tracking-widest">Entrar</button>
+            </div>
         </div>
     </div>
 
     <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-12">
-        <header class="flex justify-between items-center py-6">
-            <div class="flex items-center gap-3 cursor-pointer group" onclick="toggleMenu()">
+        <header class="flex justify-between items-center py-8">
+            <div class="flex items-center gap-4 cursor-pointer group" onclick="toggleMenu()">
                 <div class="relative">
-                    <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-2xl overflow-hidden shadow-lg ring-4 ring-white transition-transform group-active:scale-90">
+                    <div class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-2xl overflow-hidden shadow-xl ring-4 ring-white">
                         <span id="user-initial"></span>
                         <img id="user-photo" class="hidden w-full h-full object-cover">
                     </div>
-                    <div class="absolute -bottom-1 -right-1 bg-emerald-500 w-4 h-4 rounded-full border-2 border-white"></div>
+                    <div class="absolute bottom-0 right-0 bg-emerald-500 w-5 h-5 rounded-full border-4 border-white"></div>
                 </div>
                 <div>
-                    <h1 class="text-lg font-black italic uppercase leading-none text-slate-800">Hola, <span id="user-display"></span></h1>
-                    <p class="text-[9px] text-blue-600 font-black uppercase tracking-widest mt-1">Ver Perfil ➔</p>
+                    <h1 class="text-xl font-black italic uppercase leading-none text-slate-800">Hola, <span id="user-display"></span></h1>
+                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1 italic">Menú de usuario ➔</p>
                 </div>
             </div>
-            <img src="logo.png" class="h-10 opacity-10 grayscale" onerror="this.style.display='none'">
         </header>
 
-        <div class="bg-blue-600 rounded-[2.2rem] p-6 shadow-blue-200 shadow-xl mb-6 text-white text-center relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="text-[9px] font-black opacity-60 uppercase mb-1 tracking-[0.2em]">Comunicado</h3>
-                <p id="muro-texto" class="text-sm font-bold italic leading-tight">Cargando avisos...</p>
+        <div class="bg-blue-600 rounded-[2.5rem] p-8 shadow-blue-200 shadow-2xl mb-8 text-white relative overflow-hidden">
+            <h3 class="text-[10px] font-black opacity-50 uppercase mb-2 tracking-widest text-center">Aviso Importante</h3>
+            <p id="muro-texto" class="text-center font-bold text-lg leading-tight">Cargando avisos...</p>
+        </div>
+
+        <div id="cronometro-box" class="hidden bg-white rounded-[2.2rem] p-6 mb-8 border border-slate-100 shadow-sm text-center">
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Tiempo de Trabajo</p>
+            <div id="tiempo-transcurrido" class="text-5xl font-black text-slate-900 trabajando tracking-tighter">00:00:00</div>
+        </div>
+
+        <div class="bg-white rounded-[2.8rem] p-10 shadow-sm border border-slate-100 text-center mb-8">
+            <div id="status" class="mb-8 text-[11px] font-black text-slate-300 uppercase tracking-widest">¿Qué vas a hacer hoy?</div>
+            <div class="grid grid-cols-2 gap-6">
+                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all">ENTRADA</button>
+                <button onclick="fichar('SALIDA')" class="bg-rose-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all">SALIDA</button>
             </div>
         </div>
 
-        <div id="cronometro-box" class="hidden bg-white rounded-[2rem] p-5 mb-6 border border-slate-100 shadow-sm text-center">
-            <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1">Tiempo de Jornada</p>
-            <div id="tiempo-transcurrido" class="text-4xl font-black text
+        <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 mb-8 text-center overflow-hidden">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">Próximos Partidos y Eventos</h3>
+            <div class="rounded-3xl overflow-hidden border border-slate-50">
+                <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
+                        style="border: 0" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
+            <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6 text-center italic">Tus últimos registros</h3>
+            <div id="historial-lista" class="space-y-4 text-center"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = localStorage.getItem('usuario_empresa');
+        let userFoto = "";
+        let timerInterval;
+
+        if(currentUser) { mostrarApp(); }
+
+        async function login() {
+            const name = document.getElementById('username').value.trim();
+            if (!name) return alert("Por favor, pon tu nombre");
+            
+            const pinInput = prompt("Introduce tu PIN de seguridad:");
+            if (!pinInput) return;
+
+            const { data, error } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pinInput).single();
+
+            if (data) { 
+                localStorage.setItem('usuario_empresa', name); 
+                currentUser = name; 
+                mostrarApp(); 
+            } else {
+                alert("❌ Acceso Denegado: El nombre o el PIN no coinciden. Revisa mayúsculas y tildes.");
+            }
+        }
+
+        async function mostrarApp() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('app-section').classList.remove('hidden');
+            document.getElementById('user-display').innerText = currentUser;
+            
+            // Cargar datos usuario
+            const { data: user } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
+            if (user && user.foto) {
+                userFoto = user.foto;
+                document.getElementById('user-photo').src = user.foto;
+                document.getElementById('user-photo').classList.remove('hidden');
+                document.getElementById('user-initial').classList.add('hidden');
+            } else {
+                document.getElementById('user-initial').innerText = currentUser.charAt(0).toUpperCase();
+            }
+
+            cargarAviso();
+            cargarHistorial();
+        }
+
+        function toggleMenu() { document.getElementById('side-menu').classList.toggle('translate-x-full'); }
+
+        // CHAT REALTIME
+        function abrirChat() {
+            document.getElementById('chat-window').classList.remove('translate-y-full');
+            cargarMensajes();
+            _supabase.channel('public:chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => {
+                dibujarMensaje(payload.new);
+            }).subscribe();
+        }
+
+        function cerrarChat() { document.getElementById('chat-window').classList.add('translate-y-full'); }
+
+        async function cargarMensajes() {
+            const { data } = await _supabase.from('chat').select('*').order('created_at', { ascending: true }).limit(50);
+            const contenedor = document.getElementById('chat-mensajes');
+            contenedor.innerHTML = "";
+            if (data) data.forEach(m => dibujarMensaje(m));
+        }
+
+        function dibujarMensaje(m) {
+            const contenedor = document.getElementById('chat-mensajes');
+            const esMio = m.nombre === currentUser;
+            const div = document.createElement('div');
+            div.className = `flex ${esMio ? 'justify-end' : 'justify-start'}`;
+            div.innerHTML = `
+                <div class="${esMio ? 'bg-blue-600 text-white rounded-l-3xl rounded-tr-3xl shadow-blue-100' : 'bg-white text-slate-800 rounded-r-3xl rounded-tl-3xl shadow-sm'} p-4 max-w-[85%] border border-slate-50">
+                    <p class="text-[8px] font-black opacity-50 mb-1 uppercase tracking-widest">${m.nombre}</p>
+                    <p class="text-[13px] font-semibold leading-tight">${m.mensaje}</p>
+                </div>
+            `;
+            contenedor.appendChild(div);
+            contenedor.scrollTop = contenedor.scrollHeight;
+        }
+
+        async function enviarMensaje() {
+            const input = document.getElementById('chat-input');
+            const texto = input.value.trim();
+            if (!texto) return;
+            await _supabase.from('chat').insert([{ nombre: currentUser, mensaje: texto, foto: userFoto }]);
+            input.value = "";
+        }
+
+        // GESTIÓN
+        async function abrirDocumentos() {
+            const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
+            if (data && data.documentos_url) window.open(data.documentos_url, '_blank');
+            else alert("Tus documentos aún no están listos.");
+        }
+
+        async function cargarAviso() {
+            const { data } = await _supabase.from('avisos').select('mensaje').order('created_at', { ascending: false }).limit(1).single();
+            if (data) document.getElementById('muro-texto').innerText = data.mensaje;
+        }
+
+        async function cargarHistorial() {
+            const lista = document.getElementById('historial-lista');
+            const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(3
