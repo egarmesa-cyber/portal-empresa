@@ -12,63 +12,89 @@
         .calendario-container iframe { width: 100% !important; border-radius: 1.5rem; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900 overflow-x-hidden">
+
+    <div id="side-menu" class="fixed inset-0 z-50 translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleMenu()"></div>
+        <div class="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-8 flex flex-col">
+            <button onclick="toggleMenu()" class="text-right text-slate-400 font-black mb-10 uppercase text-xs tracking-widest">✕ Cerrar</button>
+            
+            <div class="space-y-8 flex-1">
+                <div>
+                    <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Mi Perfil</h3>
+                    <button onclick="alert('Próximamente: Podrás subir tu foto directamente desde aquí')" class="flex items-center gap-4 font-bold text-slate-700 hover:text-blue-600 transition-all">
+                        <span class="bg-slate-100 p-2 rounded-lg">📸</span> Editar Foto
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Gestión</h3>
+                    <button onclick="abrirDocumentos()" class="flex items-center gap-4 font-bold text-slate-700 hover:text-blue-600 transition-all w-full text-left">
+                        <span class="bg-slate-100 p-2 rounded-lg">📁</span> Mis Documentos
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="logout()" class="mt-auto flex items-center gap-4 font-black text-rose-500 uppercase text-xs tracking-widest">
+                <span class="bg-rose-50 p-2 rounded-lg">🚪</span> Salir de la App
+            </button>
+        </div>
+    </div>
 
     <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-xl w-full max-w-sm border border-slate-100 text-center">
             <img src="logo.png" class="h-24 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
             <h2 class="text-2xl font-black italic uppercase tracking-tighter">Zona Mixta</h2>
-            <p class="text-slate-400 text-xs mb-8 font-bold uppercase tracking-widest">Acceso con PIN</p>
+            <p class="text-slate-400 text-xs mb-8 font-bold uppercase tracking-widest text-blue-600">Portal del Empleado</p>
             <input type="text" id="username" placeholder="Nombre de usuario" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 text-center font-bold outline-none focus:ring-2 focus:ring-blue-600">
-            <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all">ACCEDER</button>
+            <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all">IDENTIFICARSE</button>
         </div>
     </div>
 
     <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-12">
         <header class="flex justify-between items-center py-6">
-            <div class="flex items-center gap-3">
-                <div id="user-photo-container">
-                    <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xl overflow-hidden shadow-md">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="toggleMenu()">
+                <div id="user-photo-container" class="relative">
+                    <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-2xl overflow-hidden shadow-lg ring-4 ring-white">
                         <span id="user-initial"></span>
                         <img id="user-photo" class="hidden w-full h-full object-cover">
                     </div>
+                    <div class="absolute -bottom-1 -right-1 bg-emerald-500 w-4 h-4 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
                     <h1 class="text-lg font-black italic uppercase leading-none">Hola, <span id="user-display"></span></h1>
-                    <p id="fecha" class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1"></p>
+                    <p class="text-[9px] text-blue-600 font-black uppercase tracking-widest mt-1">Ver perfil e info ➔</p>
                 </div>
             </div>
-            <button onclick="logout()" class="text-[10px] font-black bg-slate-200 px-4 py-2 rounded-full uppercase tracking-tighter shadow-sm">Salir</button>
+            <img src="logo.png" class="h-10 opacity-10 grayscale" onerror="this.style.display='none'">
         </header>
 
-        <div class="bg-blue-600 rounded-[2.2rem] p-6 shadow-blue-200 shadow-xl mb-6 text-white relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="text-[10px] font-black opacity-70 uppercase mb-1">Aviso del día</h3>
-                <p id="muro-texto" class="text-sm font-bold leading-tight">Cargando avisos...</p>
-            </div>
+        <div class="bg-blue-600 rounded-[2.2rem] p-6 shadow-blue-200 shadow-xl mb-6 text-white">
+            <h3 class="text-[10px] font-black opacity-70 uppercase mb-1 tracking-widest">Comunicado</h3>
+            <p id="muro-texto" class="text-sm font-bold">Cargando avisos de dirección...</p>
         </div>
 
         <div id="cronometro-box" class="hidden bg-white rounded-3xl p-5 mb-6 border border-slate-100 shadow-sm text-center">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jornada Activa</p>
-            <div id="tiempo-transcurrido" class="text-4xl font-black text-slate-900 trabajando tracking-tight">00:00:00</div>
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1">Tiempo de Jornada</p>
+            <div id="tiempo-transcurrido" class="text-4xl font-black text-slate-900 trabajando tracking-tighter">00:00:00</div>
         </div>
 
         <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 text-center mb-6">
-            <div id="status" class="mb-6 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Selecciona acción</div>
+            <div id="status" class="mb-6 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Registro de jornada</div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white py-8 rounded-[1.8rem] font-black text-lg shadow-lg active:scale-95 transition-all shadow-emerald-100">ENTRADA</button>
-                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white py-8 rounded-[1.8rem] font-black text-lg shadow-lg active:scale-95 transition-all shadow-rose-100">SALIDA</button>
+                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white py-8 rounded-[2rem] font-black text-lg shadow-lg active:scale-95 transition-all shadow-emerald-100">ENTRADA</button>
+                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white py-8 rounded-[2rem] font-black text-lg shadow-lg active:scale-95 transition-all shadow-rose-100">SALIDA</button>
             </div>
         </div>
 
         <div class="bg-white rounded-[2.2rem] p-4 shadow-sm border border-slate-100 mb-6 calendario-container">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center">Calendario Zona Mixta</h3>
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center">Próximos Eventos</h3>
             <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
-                    style="border: 0" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
+                    style="border: 0" width="100%" height="300" frameborder="0" scrolling="no"></iframe>
         </div>
 
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center italic text-slate-300 tracking-[0.3em]">Historial</h3>
+        <div id="historial-container" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+            <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-4 text-center italic">Últimos movimientos</h3>
             <div id="historial-lista" class="space-y-3"></div>
         </div>
     </div>
@@ -85,14 +111,14 @@
 
         async function login() {
             const name = document.getElementById('username').value.trim();
-            if (!name) return alert("Introduce tu nombre");
-            const pinInput = prompt("Introduce tu PIN:");
+            if (!name) return alert("Escribe tu nombre");
+            const pinInput = prompt("Introduce tu PIN de 4 dígitos:");
             if (!pinInput) return;
 
             const { data, error } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pinInput).single();
 
             if (error || !data) {
-                alert("Acceso incorrecto");
+                alert("Usuario o PIN incorrecto");
             } else {
                 localStorage.setItem('usuario_empresa', name);
                 currentUser = name;
@@ -104,9 +130,8 @@
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('user-display').innerText = currentUser;
-            document.getElementById('fecha').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
             
-            // Cargar Foto
+            // Cargar datos extra del usuario (foto y docs)
             const { data: user } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
             if (user && user.foto) {
                 document.getElementById('user-photo').src = user.foto;
@@ -120,6 +145,20 @@
             cargarHistorial();
         }
 
+        function toggleMenu() {
+            const menu = document.getElementById('side-menu');
+            menu.classList.toggle('translate-x-full');
+        }
+
+        async function abrirDocumentos() {
+            const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
+            if (data && data.documentos_url) {
+                window.open(data.documentos_url, '_blank');
+            } else {
+                alert("Tu carpeta de documentos aún no ha sido vinculada.");
+            }
+        }
+
         async function cargarAviso() {
             const { data } = await _supabase.from('avisos').select('mensaje').order('created_at', { ascending: false }).limit(1).single();
             if (data) document.getElementById('muro-texto').innerText = data.mensaje;
@@ -131,9 +170,9 @@
             
             if (data && data.length > 0) {
                 lista.innerHTML = data.map(f => `
-                    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-50 shadow-sm">
-                        <span class="text-[10px] font-black ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} uppercase italic">${f.Tipo}</span>
-                        <span class="text-xs font-black text-slate-700">${new Date(f.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <span class="text-[10px] font-black ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} uppercase">${f.Tipo}</span>
+                        <span class="text-xs font-black text-slate-600">${new Date(f.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                 `).join('');
 
@@ -163,7 +202,7 @@
                 const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
                 const { error } = await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]);
                 if (!error) { statusDiv.innerText = "REGISTRADO ✅"; cargarHistorial(); }
-            }, () => alert("Activa el GPS"));
+            }, () => alert("Por favor, activa el GPS"));
         }
 
         function logout() { localStorage.removeItem('usuario_empresa'); location.reload(); }
