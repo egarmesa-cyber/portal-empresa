@@ -12,55 +12,39 @@
 <body class="bg-gray-50 min-h-screen font-sans">
 
     <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100">
-            <div class="text-center mb-8">
-                <div class="mx-auto mb-4 flex justify-center">
-                    <img src="logo.png" alt="Logo Zona Mixta" class="h-24 w-auto object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/150?text=Logo+ZM'">
-                </div>
-                <h2 class="text-2xl font-black text-gray-800">Zona Mixta</h2>
-                <p class="text-gray-400 text-sm italic">Acceso con PIN de Seguridad</p>
-            </div>
-            
-            <div class="space-y-4">
-                <input type="text" id="username" placeholder="Nombre de empleado" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold">
-                <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-lg transition-all active:scale-95">
-                    IDENTIFICARSE
-                </button>
-            </div>
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100 text-center">
+            <img src="logo.png" alt="Logo" class="h-24 mx-auto mb-4 object-contain" onerror="this.src='https://via.placeholder.com/150?text=Logo+ZM'">
+            <h2 class="text-2xl font-black text-gray-800">Zona Mixta</h2>
+            <p class="text-gray-400 text-sm mb-8">Acceso con PIN</p>
+            <input type="text" id="username" placeholder="Nombre de empleado" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 text-center font-bold outline-none ring-blue-500 focus:ring-2">
+            <button onclick="login()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition-all">ENTRAR</button>
         </div>
     </div>
 
-    <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-20">
+    <div id="app-section" class="hidden max-w-md mx-auto p-4">
         <header class="flex justify-between items-center py-6">
             <div>
-                <h1 class="text-xl font-black text-gray-800">Hola, <span id="user-display" class="text-blue-600"></span></h1>
-                <p id="fecha" class="text-xs text-gray-400 font-medium uppercase tracking-widest"></p>
+                <h1 class="text-xl font-black text-gray-800 tracking-tight">Hola, <span id="user-display" class="text-blue-600"></span></h1>
+                <p id="fecha" class="text-[10px] text-gray-400 font-bold uppercase"></p>
             </div>
-            <button onclick="logout()" class="bg-gray-200 p-2 rounded-full text-gray-500 text-xs px-4 font-bold">Salir</button>
+            <button onclick="logout()" class="text-xs font-bold text-gray-400 border border-gray-200 px-3 py-1 rounded-full">Salir</button>
         </header>
 
-        <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 shadow-xl mb-8 text-white relative overflow-hidden">
-            <h3 class="font-bold mb-1 opacity-90 italic">Anuncio del día</h3>
-            <p id="muro-texto" class="text-lg font-medium">¡Bienvenidos! Recordad fichar vuestra jornada y activar el GPS.</p>
+        <div class="bg-blue-600 rounded-3xl p-6 shadow-xl mb-8 text-white">
+            <h3 class="text-xs font-bold opacity-80 uppercase mb-1">Muro de Avisos</h3>
+            <p class="text-lg font-medium italic">¡Bienvenidos! Recordad activar el GPS al fichar.</p>
         </div>
 
-        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-6 text-center">
-            <div id="status" class="mb-6 text-sm font-bold text-gray-400 uppercase tracking-widest">Listo para registrar</div>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center">
+            <div id="status" class="mb-6 text-xs font-black text-gray-400 uppercase tracking-widest">Listo para fichar</div>
             <div class="grid grid-cols-1 gap-6">
-                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
-                    ENTRADA
-                </button>
-                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg transition-all active:scale-95">
-                    SALIDA
-                </button>
+                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg active:scale-95 transition-all">ENTRADA</button>
+                <button onclick="fichar('SALIDA')" class="bg-rose-500 hover:bg-rose-600 text-white py-6 rounded-3xl font-black text-xl shadow-lg active:scale-95 transition-all">SALIDA</button>
             </div>
         </div>
-
-        <p class="text-center text-[10px] text-gray-300 uppercase font-bold tracking-[0.2em]">🔒 Conexión Segura & GPS Activo</p>
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
         const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -68,15 +52,12 @@
         let currentUser = localStorage.getItem('usuario_empresa');
         if(currentUser) { mostrarApp(); }
 
-        // LOGIN CON PIN
         async function login() {
             const name = document.getElementById('username').value.trim();
-            if (!name) return alert("Por favor, introduce tu nombre");
-
-            const pinInput = prompt("Introduce tu PIN de 4 dígitos:"); 
+            if (!name) return alert("Pon tu nombre");
+            const pinInput = prompt("PIN de seguridad:");
             if (!pinInput) return;
 
-            // Consultamos la tabla de usuarios
             const { data, error } = await _supabase
                 .from('usuarios')
                 .select('*')
@@ -85,7 +66,7 @@
                 .single();
 
             if (error || !data) {
-                alert("❌ ACCESO DENEGADO: Nombre o PIN incorrectos.");
+                alert("Acceso denegado: Nombre o PIN incorrectos");
             } else {
                 localStorage.setItem('usuario_empresa', name);
                 currentUser = name;
@@ -107,23 +88,19 @@
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
                 
+                // He eliminado 'Hora_Local' para que no de error
                 const { error } = await _supabase
                     .from('fichajes')
-                    .insert([{ 
-                        Usuario: currentUser, 
-                        Tipo: tipo, 
-                        Ubicacion: coords,
-                        Hora_Local: new Date().toLocaleTimeString('es-ES') 
-                    }]);
+                    .insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]);
 
                 if (error) {
                     alert("Error: " + error.message);
                 } else {
-                    statusDiv.innerText = `✅ ${tipo} GUARDADA A LAS ${new Date().toLocaleTimeString()}`;
-                    statusDiv.className = "mb-6 text-sm font-bold text-emerald-500 uppercase tracking-widest";
+                    statusDiv.innerText = "✅ " + tipo + " REGISTRADA";
+                    statusDiv.className = "mb-6 text-xs font-black text-emerald-500 uppercase tracking-widest";
                 }
             }, (err) => {
-                alert("Debes permitir el acceso al GPS para fichar.");
+                alert("Activa el GPS para fichar.");
                 statusDiv.innerText = "Error: GPS necesario";
             });
         }
