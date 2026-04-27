@@ -10,7 +10,6 @@
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .trabajando { animation: pulse-soft 2s infinite; }
         .chat-container { height: 60vh; overflow-y: auto; scroll-behavior: smooth; }
-        /* Evitar scroll lateral */
         body { overflow-x: hidden; touch-action: manipulation; }
     </style>
 </head>
@@ -21,6 +20,12 @@
         <div class="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-8 flex flex-col">
             <button onclick="toggleMenu()" class="text-right text-slate-400 font-black mb-10 uppercase text-[10px] tracking-widest">✕ Cerrar</button>
             <div class="space-y-8 flex-1">
+                <div>
+                    <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Mi Perfil</h3>
+                    <button onclick="editarFoto()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
+                        <span class="bg-slate-100 p-3 rounded-xl text-xl">📸</span> Cambiar mi Foto
+                    </button>
+                </div>
                 <div>
                     <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Comunicación</h3>
                     <button onclick="abrirChat()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
@@ -42,9 +47,7 @@
 
     <div id="chat-window" class="fixed inset-0 z-[60] bg-white translate-y-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="p-5 border-b flex justify-between items-center bg-blue-600 text-white shadow-lg">
-            <h2 class="font-black italic uppercase tracking-tighter flex items-center gap-2">
-                <span>💬</span> Chat Zona Mixta
-            </h2>
+            <h2 class="font-black italic uppercase tracking-tighter flex items-center gap-2">Chat Zona Mixta</h2>
             <button onclick="cerrarChat()" class="font-black text-[10px] bg-white/20 px-4 py-2 rounded-full uppercase">Volver</button>
         </div>
         <div id="chat-mensajes" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 chat-container"></div>
@@ -57,19 +60,18 @@
     <div id="login-section" class="flex items-center justify-center min-h-screen p-6">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border border-slate-100 text-center">
             <img src="logo.png" class="h-28 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
-            <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Zona Mixta</h2>
-            <p class="text-blue-600 text-[10px] mb-10 font-black uppercase tracking-[0.3em]">Portal del Empleado</p>
-            
+            <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-2 text-slate-800">Zona Mixta</h2>
+            <p class="text-blue-600 text-[10px] mb-10 font-black uppercase tracking-[0.3em]">Acceso Personal</p>
             <div class="space-y-4">
                 <input type="text" id="username" placeholder="Nombre de Usuario" class="w-full p-5 bg-slate-50 rounded-2xl text-center font-bold outline-none focus:ring-2 focus:ring-blue-600 border border-slate-100">
-                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all text-sm uppercase tracking-widest">Entrar</button>
+                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all text-sm uppercase tracking-widest">ENTRAR</button>
             </div>
         </div>
     </div>
 
     <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-12">
         <header class="flex justify-between items-center py-8">
-            <div class="flex items-center gap-4 cursor-pointer group" onclick="toggleMenu()">
+            <div class="flex items-center gap-4 cursor-pointer" onclick="toggleMenu()">
                 <div class="relative">
                     <div class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-2xl overflow-hidden shadow-xl ring-4 ring-white">
                         <span id="user-initial"></span>
@@ -79,40 +81,40 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-black italic uppercase leading-none text-slate-800">Hola, <span id="user-display"></span></h1>
-                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1 italic">Menú de usuario ➔</p>
+                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1 italic">Toca para opciones ➔</p>
                 </div>
             </div>
         </header>
 
-        <div class="bg-blue-600 rounded-[2.5rem] p-8 shadow-blue-200 shadow-2xl mb-8 text-white relative overflow-hidden">
-            <h3 class="text-[10px] font-black opacity-50 uppercase mb-2 tracking-widest text-center">Aviso Importante</h3>
-            <p id="muro-texto" class="text-center font-bold text-lg leading-tight">Cargando avisos...</p>
+        <div class="bg-blue-600 rounded-[2.5rem] p-8 shadow-blue-200 shadow-2xl mb-8 text-white text-center relative overflow-hidden">
+            <h3 class="text-[10px] font-black opacity-50 uppercase mb-2 tracking-widest text-center">Aviso Dirección</h3>
+            <p id="muro-texto" class="font-bold text-lg leading-tight">¡Bienvenido al equipo!</p>
         </div>
 
         <div id="cronometro-box" class="hidden bg-white rounded-[2.2rem] p-6 mb-8 border border-slate-100 shadow-sm text-center">
-            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Tiempo de Trabajo</p>
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Jornada Activa</p>
             <div id="tiempo-transcurrido" class="text-5xl font-black text-slate-900 trabajando tracking-tighter">00:00:00</div>
         </div>
 
         <div class="bg-white rounded-[2.8rem] p-10 shadow-sm border border-slate-100 text-center mb-8">
-            <div id="status" class="mb-8 text-[11px] font-black text-slate-300 uppercase tracking-widest">¿Qué vas a hacer hoy?</div>
+            <div id="status" class="mb-8 text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Registro de Jornada</div>
             <div class="grid grid-cols-2 gap-6">
-                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all">ENTRADA</button>
-                <button onclick="fichar('SALIDA')" class="bg-rose-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all">SALIDA</button>
+                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all shadow-emerald-100">ENTRADA</button>
+                <button onclick="fichar('SALIDA')" class="bg-rose-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all shadow-rose-100">SALIDA</button>
             </div>
         </div>
 
         <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 mb-8 text-center overflow-hidden">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">Próximos Partidos y Eventos</h3>
-            <div class="rounded-3xl overflow-hidden border border-slate-50">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">Partidos y Eventos</h3>
+            <div class="rounded-3xl overflow-hidden">
                 <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
-                        style="border: 0" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
+                        style="border: 0" width="100%" height="300" frameborder="0" scrolling="no"></iframe>
             </div>
         </div>
 
         <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
-            <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6 text-center italic">Tus últimos registros</h3>
-            <div id="historial-lista" class="space-y-4 text-center"></div>
+            <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6 text-center italic text-blue-600">Historial reciente</h3>
+            <div id="historial-lista" class="space-y-4"></div>
         </div>
     </div>
 
@@ -129,45 +131,42 @@
 
         async function login() {
             const name = document.getElementById('username').value.trim();
-            if (!name) return alert("Por favor, pon tu nombre");
-            
-            const pinInput = prompt("Introduce tu PIN de seguridad:");
-            if (!pinInput) return;
-
-            const { data, error } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pinInput).single();
-
-            if (data) { 
-                localStorage.setItem('usuario_empresa', name); 
-                currentUser = name; 
-                mostrarApp(); 
-            } else {
-                alert("❌ Acceso Denegado: El nombre o el PIN no coinciden. Revisa mayúsculas y tildes.");
-            }
+            if (!name) return alert("Pon tu nombre");
+            const pinInput = prompt("PIN de seguridad:");
+            const { data } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pinInput).single();
+            if (data) { localStorage.setItem('usuario_empresa', name); currentUser = name; mostrarApp(); }
+            else { alert("Usuario o PIN incorrecto."); }
         }
 
         async function mostrarApp() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('user-display').innerText = currentUser;
-            
-            // Cargar datos usuario
             const { data: user } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
             if (user && user.foto) {
                 userFoto = user.foto;
-                document.getElementById('user-photo').src = user.foto;
-                document.getElementById('user-photo').classList.remove('hidden');
+                const img = document.getElementById('user-photo');
+                img.src = user.foto;
+                img.classList.remove('hidden');
                 document.getElementById('user-initial').classList.add('hidden');
             } else {
                 document.getElementById('user-initial').innerText = currentUser.charAt(0).toUpperCase();
             }
-
             cargarAviso();
             cargarHistorial();
         }
 
         function toggleMenu() { document.getElementById('side-menu').classList.toggle('translate-x-full'); }
 
-        // CHAT REALTIME
+        async function editarFoto() {
+            const link = prompt("Pega aquí el enlace de tu foto (JPG o PNG):");
+            if (link) {
+                await _supabase.from('usuarios').update({ foto: link }).eq('Nombre', currentUser);
+                alert("¡Foto actualizada! Reinicia la App.");
+                location.reload();
+            }
+        }
+
         function abrirChat() {
             document.getElementById('chat-window').classList.remove('translate-y-full');
             cargarMensajes();
@@ -180,24 +179,19 @@
 
         async function cargarMensajes() {
             const { data } = await _supabase.from('chat').select('*').order('created_at', { ascending: true }).limit(50);
-            const contenedor = document.getElementById('chat-mensajes');
-            contenedor.innerHTML = "";
+            const cont = document.getElementById('chat-mensajes');
+            cont.innerHTML = "";
             if (data) data.forEach(m => dibujarMensaje(m));
         }
 
         function dibujarMensaje(m) {
-            const contenedor = document.getElementById('chat-mensajes');
+            const cont = document.getElementById('chat-mensajes');
             const esMio = m.nombre === currentUser;
             const div = document.createElement('div');
             div.className = `flex ${esMio ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `
-                <div class="${esMio ? 'bg-blue-600 text-white rounded-l-3xl rounded-tr-3xl shadow-blue-100' : 'bg-white text-slate-800 rounded-r-3xl rounded-tl-3xl shadow-sm'} p-4 max-w-[85%] border border-slate-50">
-                    <p class="text-[8px] font-black opacity-50 mb-1 uppercase tracking-widest">${m.nombre}</p>
-                    <p class="text-[13px] font-semibold leading-tight">${m.mensaje}</p>
-                </div>
-            `;
-            contenedor.appendChild(div);
-            contenedor.scrollTop = contenedor.scrollHeight;
+            div.innerHTML = `<div class="${esMio ? 'bg-blue-600 text-white rounded-l-3xl rounded-tr-3xl shadow-lg shadow-blue-100' : 'bg-white text-slate-800 rounded-r-3xl rounded-tl-3xl shadow-sm border border-slate-100'} p-4 max-w-[85%]"><p class="text-[8px] font-black opacity-50 mb-1 uppercase">${m.nombre}</p><p class="text-sm font-semibold">${m.mensaje}</p></div>`;
+            cont.appendChild(div);
+            cont.scrollTop = cont.scrollHeight;
         }
 
         async function enviarMensaje() {
@@ -208,11 +202,10 @@
             input.value = "";
         }
 
-        // GESTIÓN
         async function abrirDocumentos() {
             const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
             if (data && data.documentos_url) window.open(data.documentos_url, '_blank');
-            else alert("Tus documentos aún no están listos.");
+            else alert("Tus documentos no han sido vinculados aún.");
         }
 
         async function cargarAviso() {
@@ -224,27 +217,21 @@
             const lista = document.getElementById('historial-lista');
             const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(3);
             if (data && data.length > 0) {
-                lista.innerHTML = data.map(f => `
-                    <div class="flex justify-between items-center bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm">
-                        <span class="text-[10px] font-black ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} uppercase italic">${f.Tipo}</span>
-                        <span class="text-xs font-black text-slate-600">${new Date(f.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
-                `).join('');
-                if (data[0].Tipo === 'ENTRADA') { iniciarCronometro(data[0].created_at); }
+                lista.innerHTML = data.map(f => `<div class="flex justify-between items-center bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm"><span class="text-[10px] font-black ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} uppercase">${f.Tipo}</span><span class="text-xs font-black text-slate-600">${new Date(f.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div>`).join('');
+                if (data[0].Tipo === 'ENTRADA') iniciarCronometro(data[0].created_at);
                 else { document.getElementById('cronometro-box').classList.add('hidden'); clearInterval(timerInterval); }
             }
         }
 
-        function iniciarCronometro(horaEntrada) {
-            const display = document.getElementById('tiempo-transcurrido');
+        function iniciarCronometro(hora) {
             document.getElementById('cronometro-box').classList.remove('hidden');
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                const diff = new Date() - new Date(horaEntrada);
+                const diff = new Date() - new Date(hora);
                 const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
                 const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                 const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-                display.innerText = `${h}:${m}:${s}`;
+                document.getElementById('tiempo-transcurrido').innerText = `${h}:${m}:${s}`;
             }, 1000);
         }
 
@@ -253,9 +240,10 @@
             statusDiv.innerText = "LOCALIZANDO...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-                const { error } = await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]);
-                if (!error) { statusDiv.innerText = "¡OK! REGISTRADO ✅"; cargarHistorial(); }
-            }, () => alert("GPS Obligatorio para fichar"));
+                await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]);
+                statusDiv.innerText = "REGISTRADO ✅";
+                cargarHistorial();
+            }, () => alert("GPS Obligatorio"));
         }
 
         function logout() { localStorage.removeItem('usuario_empresa'); location.reload(); }
