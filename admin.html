@@ -6,42 +6,39 @@
     <title>Admin - Zona Mixta</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 min-h-screen p-4">
 
     <div class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
+        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div>
-                <h1 class="text-2xl font-black text-slate-800">Panel de Control</h1>
-                <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Registros de Empleados</p>
+                <h1 class="text-2xl font-black text-slate-800 italic uppercase tracking-tighter">Control Admin</h1>
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gestión de Tiempos Zona Mixta</p>
             </div>
-            <button onclick="cargarRegistros()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition">↻ Actualizar</button>
+            <button onclick="cargarRegistros()" class="bg-slate-900 text-white px-6 py-2 rounded-xl font-bold hover:bg-slate-800 transition text-xs uppercase tracking-widest">↻ Actualizar</button>
         </header>
 
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="bg-emerald-500 p-6 rounded-2xl text-white shadow-lg">
-                <p class="text-xs font-bold uppercase opacity-80">Hoy</p>
-                <h3 id="total-hoy" class="text-3xl font-black">--</h3>
-                <p class="text-[10px] mt-1">Fichajes totales</p>
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2 italic">Horas Totales (Cómputo Real)</h3>
+        <div id="resumen-horas" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             </div>
-            <button onclick="exportarExcel()" class="bg-slate-800 p-6 rounded-2xl text-white shadow-lg flex flex-col justify-center items-center">
-                <span class="text-xl">📊</span>
-                <span class="text-xs font-bold uppercase mt-1 text-center">Exportar Datos</span>
-            </button>
-        </div>
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+            <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Historial de Movimientos</span>
+                <span id="total-hoy" class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md font-bold">0</span>
+            </div>
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100">
-                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Empleado</th>
-                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Acción</th>
-                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Hora Local</th>
-                        <th class="p-4 text-xs font-black text-slate-400 uppercase">Mapa</th>
+                    <tr class="bg-white border-b border-slate-50">
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Empleado</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Acción</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Hora</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase text-center">Gestión</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-cuerpo" class="text-slate-600">
-                    </tbody>
+                <tbody id="tabla-cuerpo" class="text-slate-600"></tbody>
             </table>
         </div>
     </div>
@@ -53,52 +50,88 @@
 
         async function cargarRegistros() {
             const cuerpo = document.getElementById('tabla-cuerpo');
-            cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center">Cargando datos...</td></tr>';
+            cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Sincronizando base de datos...</td></tr>';
 
             const { data, error } = await _supabase
                 .from('fichajes')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                alert("Error: " + error.message);
-                return;
-            }
+            if (error) { alert("Error: " + error.message); return; }
 
             cuerpo.innerHTML = '';
             document.getElementById('total-hoy').innerText = data.length;
 
+            // --- Lógica para Horas Totales ---
+            calcularHorasTotales(data);
+
+            // --- Lógica para Tabla de Registros ---
             data.forEach(reg => {
                 const fila = document.createElement('tr');
                 fila.className = "border-b border-slate-50 hover:bg-slate-50 transition";
-                
-                // Formatear la hora local si no existe la columna Hora_Local
-                const horaMostrada = reg.Hora_Local || new Date(reg.created_at).toLocaleTimeString();
-                
-                // Crear botón de mapa si hay coordenadas
-                const mapaLink = reg.Ubicacion ? 
-                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="text-blue-500 font-bold text-xs underline">📍 Ver</a>` : 
-                    '<span class="text-slate-300 text-[10px]">Sin GPS</span>';
+                const horaMostrada = new Date(reg.created_at).toLocaleString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
                 fila.innerHTML = `
-                    <td class="p-4 font-bold text-slate-800">${reg.Usuario}</td>
+                    <td class="p-4 font-bold text-slate-800 text-sm">${reg.Usuario}</td>
                     <td class="p-4">
-                        <span class="px-2 py-1 rounded-lg text-[10px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+                        <span class="px-2 py-1 rounded-lg text-[9px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
                             ${reg.Tipo}
                         </span>
                     </td>
-                    <td class="p-4 text-sm">${horaMostrada}</td>
-                    <td class="p-4">${mapaLink}</td>
+                    <td class="p-4 text-xs font-medium text-slate-500">${horaMostrada}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="borrarFichaje('${reg.id}')" class="bg-rose-50 text-rose-500 px-3 py-1 rounded-md text-[9px] font-black uppercase border border-rose-100 hover:bg-rose-500 hover:text-white transition">Eliminar</button>
+                    </td>
                 `;
                 cuerpo.appendChild(fila);
             });
         }
 
-        function exportarExcel() {
-            alert("Esta función generará un archivo CSV con todos los fichajes. (Próximamente)");
+        function calcularHorasTotales(fichajes) {
+            const resumen = document.getElementById('resumen-horas');
+            resumen.innerHTML = "";
+            const porUsuario = {};
+
+            // Agrupar por usuario
+            fichajes.forEach(f => {
+                if (!porUsuario[f.Usuario]) porUsuario[f.Usuario] = [];
+                porUsuario[f.Usuario].push(f);
+            });
+
+            for (const usuario in porUsuario) {
+                let msTotales = 0;
+                // Ordenar por fecha de más antiguo a más nuevo para calcular
+                const registros = porUsuario[usuario].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                for (let i = 0; i < registros.length; i++) {
+                    if (registros[i].Tipo === 'ENTRADA' && registros[i+1] && registros[i+1].Tipo === 'SALIDA') {
+                        msTotales += (new Date(registros[i+1].created_at) - new Date(registros[i].created_at));
+                        i++; // Saltar la salida procesada
+                    }
+                }
+
+                const h = Math.floor(msTotales / 3600000);
+                const m = Math.floor((msTotales % 3600000) / 60000);
+
+                resumen.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${usuario}</p>
+                        <p class="text-3xl font-black italic text-slate-900 leading-none">${h}<span class="text-lg opacity-30">h</span> ${m}<span class="text-lg opacity-30">m</span></p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter italic">Cálculo basado en pares cerrados</span>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
-        // Cargar al iniciar
+        async function borrarFichaje(id) {
+            if (!confirm("¿Seguro que quieres eliminar este registro? Se recalcularán las horas.")) return;
+            const { error } = await _supabase.from('fichajes').delete().eq('id', id);
+            if (error) alert("Error al borrar"); else cargarRegistros();
+        }
+
         cargarRegistros();
     </script>
 </body>
