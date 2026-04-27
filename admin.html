@@ -20,21 +20,20 @@
             <button onclick="cargarRegistros()" class="bg-slate-900 text-white px-6 py-2 rounded-xl font-bold hover:bg-slate-800 transition text-xs uppercase tracking-widest">↻ Actualizar</button>
         </header>
 
-        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2 italic">Horas Totales (Cómputo Real)</h3>
-        <div id="resumen-horas" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            </div>
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2 italic">Resumen de Actividad</h3>
+        <div id="resumen-horas" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"></div>
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-            <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Historial de Movimientos</span>
-                <span id="total-hoy" class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md font-bold">0</span>
+            <div class="p-4 bg-slate-50 border-b border-slate-100">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Historial Detallado</span>
             </div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white border-b border-slate-50">
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Empleado</th>
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Acción</th>
-                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Hora</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Fecha/Hora</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Mapa</th>
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase text-center">Gestión</th>
                     </tr>
                 </thead>
@@ -50,86 +49,94 @@
 
         async function cargarRegistros() {
             const cuerpo = document.getElementById('tabla-cuerpo');
-            cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Sincronizando base de datos...</td></tr>';
+            cuerpo.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-xs font-bold text-slate-400 uppercase">Sincronizando...</td></tr>';
 
-            const { data, error } = await _supabase
-                .from('fichajes')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) { alert("Error: " + error.message); return; }
+            const { data, error } = await _supabase.from('fichajes').select('*').order('created_at', { ascending: false });
+            if (error) return alert("Error: " + error.message);
 
             cuerpo.innerHTML = '';
-            document.getElementById('total-hoy').innerText = data.length;
+            actualizarResumen(data);
 
-            // --- Lógica para Horas Totales ---
-            calcularHorasTotales(data);
-
-            // --- Lógica para Tabla de Registros ---
             data.forEach(reg => {
                 const fila = document.createElement('tr');
                 fila.className = "border-b border-slate-50 hover:bg-slate-50 transition";
-                const horaMostrada = new Date(reg.created_at).toLocaleString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const fecha = new Date(reg.created_at).toLocaleString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                
+                // CORRECCIÓN UBICACIÓN
+                const mapaLink = reg.Ubicacion ? 
+                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold text-[9px] uppercase border border-blue-100">📍 Ver Mapa</a>` : 
+                    `<span class="text-[9px] text-slate-300 font-bold uppercase italic">Sin GPS</span>`;
 
                 fila.innerHTML = `
                     <td class="p-4 font-bold text-slate-800 text-sm">${reg.Usuario}</td>
-                    <td class="p-4">
-                        <span class="px-2 py-1 rounded-lg text-[9px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
-                            ${reg.Tipo}
-                        </span>
-                    </td>
-                    <td class="p-4 text-xs font-medium text-slate-500">${horaMostrada}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-lg text-[9px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${reg.Tipo}</span></td>
+                    <td class="p-4 text-xs font-medium text-slate-500">${fecha}</td>
+                    <td class="p-4">${mapaLink}</td>
                     <td class="p-4 text-center">
-                        <button onclick="borrarFichaje('${reg.id}')" class="bg-rose-50 text-rose-500 px-3 py-1 rounded-md text-[9px] font-black uppercase border border-rose-100 hover:bg-rose-500 hover:text-white transition">Eliminar</button>
+                        <button onclick="borrarFichaje('${reg.id}')" class="text-rose-400 hover:text-rose-600 font-bold text-[9px] uppercase">Eliminar</button>
                     </td>
                 `;
                 cuerpo.appendChild(fila);
             });
         }
 
-        function calcularHorasTotales(fichajes) {
+        function actualizarResumen(fichajes) {
             const resumen = document.getElementById('resumen-horas');
             resumen.innerHTML = "";
             const porUsuario = {};
 
-            // Agrupar por usuario
             fichajes.forEach(f => {
-                if (!porUsuario[f.Usuario]) porUsuario[f.Usuario] = [];
-                porUsuario[f.Usuario].push(f);
+                if (!porUsuario[f.Usuario]) porUsuario[f.Usuario] = { regs: [], dias: new Set() };
+                porUsuario[f.Usuario].regs.push(f);
+                porUsuario[f.Usuario].dias.add(new Date(f.created_at).toLocaleDateString());
             });
 
             for (const usuario in porUsuario) {
-                let msTotales = 0;
-                // Ordenar por fecha de más antiguo a más nuevo para calcular
-                const registros = porUsuario[usuario].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-                for (let i = 0; i < registros.length; i++) {
-                    if (registros[i].Tipo === 'ENTRADA' && registros[i+1] && registros[i+1].Tipo === 'SALIDA') {
-                        msTotales += (new Date(registros[i+1].created_at) - new Date(registros[i].created_at));
-                        i++; // Saltar la salida procesada
+                let ms = 0;
+                const regs = porUsuario[usuario].regs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+                for(let i=0; i<regs.length; i++) {
+                    if(regs[i].Tipo === 'ENTRADA' && regs[i+1] && regs[i+1].Tipo === 'SALIDA') {
+                        ms += (new Date(regs[i+1].created_at) - new Date(regs[i].created_at)); i++;
                     }
                 }
-
-                const h = Math.floor(msTotales / 3600000);
-                const m = Math.floor((msTotales % 3600000) / 60000);
+                const h = Math.floor(ms/3600000);
+                const diasTrabajados = porUsuario[usuario].dias.size;
 
                 resumen.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${usuario}</p>
-                        <p class="text-3xl font-black italic text-slate-900 leading-none">${h}<span class="text-lg opacity-30">h</span> ${m}<span class="text-lg opacity-30">m</span></p>
-                        <div class="mt-3 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter italic">Cálculo basado en pares cerrados</span>
+                        <div class="flex justify-between items-end">
+                            <p class="text-3xl font-black italic text-slate-900">${h}h <span class="text-sm opacity-30">acumuladas</span></p>
+                            <div class="text-right">
+                                <p class="text-[9px] font-black text-emerald-500 uppercase">${diasTrabajados} días de presencia</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50">
+                            <p class="text-[8px] font-black text-slate-300 uppercase mb-2">Presencia últimos 7 días</p>
+                            <div class="flex gap-1">
+                                ${generarMiniCalendario(porUsuario[usuario].dias)}
+                            </div>
                         </div>
                     </div>
                 `;
             }
         }
 
+        function generarMiniCalendario(diasSet) {
+            let html = "";
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const activo = diasSet.has(d.toLocaleDateString());
+                html += `<div class="flex-1 h-6 rounded-md ${activo ? 'bg-emerald-500' : 'bg-slate-100'} flex items-center justify-center text-[8px] font-bold ${activo ? 'text-white' : 'text-slate-300'}">${d.getDate()}</div>`;
+            }
+            return html;
+        }
+
         async function borrarFichaje(id) {
-            if (!confirm("¿Seguro que quieres eliminar este registro? Se recalcularán las horas.")) return;
-            const { error } = await _supabase.from('fichajes').delete().eq('id', id);
-            if (error) alert("Error al borrar"); else cargarRegistros();
+            if(confirm("¿Borrar registro?")) {
+                await _supabase.from('fichajes').delete().eq('id', id);
+                cargarRegistros();
+            }
         }
 
         cargarRegistros();
