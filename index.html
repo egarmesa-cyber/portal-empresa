@@ -1,179 +1,305 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Admin - Zona Mixta</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+
 </head>
+
 <body class="bg-slate-50 min-h-screen p-4">
 
+
+
     <div class="max-w-4xl mx-auto">
+
         <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+
             <div>
+
                 <h1 class="text-2xl font-black text-slate-800 italic uppercase tracking-tighter">Control Admin</h1>
+
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gestión Mensual Zona Mixta</p>
+
             </div>
+
             <div class="flex gap-2">
+
                 <select id="filtro-mes" onchange="cargarRegistros()" class="bg-slate-100 border-none rounded-xl text-xs font-bold p-2 outline-none">
+
                     <option value="0">Enero</option><option value="1">Febrero</option>
+
                     <option value="2">Marzo</option><option value="3">Abril</option>
+
                     <option value="4">Mayo</option><option value="5">Junio</option>
+
                     <option value="6">Julio</option><option value="7">Agosto</option>
+
                     <option value="8">Septiembre</option><option value="9">Octubre</option>
+
                     <option value="10">Noviembre</option><option value="11">Diciembre</option>
+
                 </select>
+
                 <button onclick="cargarRegistros()" class="bg-slate-900 text-white px-4 py-2 rounded-xl font-bold text-xs uppercase">↻</button>
+
             </div>
+
         </header>
 
+
+
         <h3 id="titulo-mes" class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2 italic text-center"></h3>
+
         <div id="resumen-horas" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"></div>
 
+
+
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+
             <table class="w-full text-left border-collapse">
+
                 <thead>
+
                     <tr class="bg-slate-50 border-b border-slate-50">
+
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Empleado</th>
+
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Acción</th>
+
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Fecha</th>
-                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase text-center">Ubicación</th>
+
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Mapa</th>
+
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase text-right">Gestión</th>
+
                     </tr>
+
                 </thead>
+
                 <tbody id="tabla-cuerpo" class="text-slate-600"></tbody>
+
             </table>
+
         </div>
+
     </div>
 
+
+
     <script>
+
         const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
+
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
+
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+
+        // Poner el mes actual por defecto al cargar
 
         document.getElementById('filtro-mes').value = new Date().getMonth();
 
+
+
         async function cargarRegistros() {
+
             const mesSeleccionado = parseInt(document.getElementById('filtro-mes').value);
+
             const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
             document.getElementById('titulo-mes').innerText = `Resumen de ${nombresMeses[mesSeleccionado]}`;
 
+
+
             const cuerpo = document.getElementById('tabla-cuerpo');
-            cuerpo.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-xs font-bold text-slate-300 italic">Sincronizando...</td></tr>';
+
+            cuerpo.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-xs font-bold text-slate-300">CARGANDO...</td></tr>';
+
+
 
             const { data, error } = await _supabase.from('fichajes').select('*').order('created_at', { ascending: false });
+
             if (error) return;
+
+
+
+            // FILTRAR DATA POR MES
 
             const dataFiltrada = data.filter(reg => new Date(reg.created_at).getMonth() === mesSeleccionado);
 
+
+
             cuerpo.innerHTML = '';
+
             actualizarResumen(dataFiltrada, mesSeleccionado);
 
+
+
             dataFiltrada.forEach(reg => {
+
                 const fila = document.createElement('tr');
+
                 fila.className = "border-b border-slate-50 hover:bg-slate-50 transition";
+
                 const fechaObj = new Date(reg.created_at);
+
                 const fechaStr = fechaObj.toLocaleDateString([], {day:'2-digit', month:'2-digit'});
+
                 const horaStr = fechaObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
                 
-                // CORRECCIÓN MAPA
+
                 const mapaLink = reg.Ubicacion ? 
-                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-black text-[9px] uppercase border border-blue-100">Ver GPS</a>` : 
-                    `<span class="text-[8px] text-slate-300 uppercase italic">Sin señal</span>`;
+
+                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="text-blue-500 font-black text-[9px] uppercase">📍 Ver</a>` : 
+
+                    `<span class="text-[8px] text-slate-300 uppercase">No GPS</span>`;
+
+
 
                 fila.innerHTML = `
+
                     <td class="p-4 font-bold text-slate-800 text-sm">${reg.Usuario}</td>
-                    <td class="p-4"><span class="px-2 py-0.5 rounded text-[8px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'} uppercase">${reg.Tipo}</span></td>
+
+                    <td class="p-4"><span class="px-2 py-0.5 rounded text-[8px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${reg.Tipo}</span></td>
+
                     <td class="p-4 text-xs text-slate-500"><b>${fechaStr}</b> ${horaStr}</td>
-                    <td class="p-4 text-center">${mapaLink}</td>
-                    <td class="p-4 text-right"><button onclick="borrarFichaje('${reg.id}')" class="text-rose-300 hover:text-rose-500 font-bold text-[9px] uppercase tracking-tighter">Eliminar</button></td>
+
+                    <td class="p-4">${mapaLink}</td>
+
+                    <td class="p-4 text-right"><button onclick="borrarFichaje('${reg.id}')" class="text-rose-300 hover:text-rose-500 font-bold text-[9px] uppercase">Borrar</button></td>
+
                 `;
+
                 cuerpo.appendChild(fila);
+
             });
+
         }
 
-        // --- LÓGICA DE VALIDACIÓN (AÑADIDA) ---
-        // Esta lógica debe estar en tu App de Trabajadores (index.html), 
-        // pero aquí te pongo cómo queda la función "fichar" para que la sustituyas allí.
-        
-        /* async function fichar(tipo) {
-            const { data: ultimo } = await _supabase.from('fichajes').select('Tipo').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(1).single();
-            
-            if (ultimo && ultimo.Tipo === tipo) {
-                alert(`⚠️ Error: Ya has registrado una ${tipo}. Debes registrar la acción contraria.`);
-                return;
-            }
 
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                await _supabase.from('fichajes').insert([{ 
-                    Usuario: currentUser, 
-                    Tipo: tipo, 
-                    Ubicacion: `${pos.coords.latitude},${pos.coords.longitude}` 
-                }]);
-                cargarRegistrosHoy();
-            });
-        }
-        */
 
         function actualizarResumen(fichajes, mes) {
+
             const resumen = document.getElementById('resumen-horas');
+
             resumen.innerHTML = "";
+
             const porUsuario = {};
 
+
+
             fichajes.forEach(f => {
+
                 if (!porUsuario[f.Usuario]) porUsuario[f.Usuario] = { regs: [], dias: new Set() };
+
                 porUsuario[f.Usuario].regs.push(f);
+
                 porUsuario[f.Usuario].dias.add(new Date(f.created_at).getDate());
+
             });
 
+
+
             for (const usuario in porUsuario) {
+
                 let ms = 0;
+
                 const regs = porUsuario[usuario].regs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-                
+
                 for(let i=0; i<regs.length; i++) {
+
                     if(regs[i].Tipo === 'ENTRADA' && regs[i+1] && regs[i+1].Tipo === 'SALIDA') {
-                        ms += (new Date(regs[i+1].created_at) - new Date(regs[i].created_at)); 
-                        i++;
+
+                        ms += (new Date(regs[i+1].created_at) - new Date(regs[i].created_at)); i++;
+
                     }
+
                 }
+
                 const h = Math.floor(ms/3600000);
-                const m = Math.floor((ms % 3600000) / 60000);
+
                 const diasTrabajados = porUsuario[usuario].dias.size;
 
+
+
                 resumen.innerHTML += `
+
                     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${usuario}</p>
-                        <p class="text-3xl font-black italic text-slate-900 leading-none">${h}h ${m}m</p>
-                        <p class="text-[10px] font-bold text-emerald-500 mt-2 uppercase">${diasTrabajados} días trabajados</p>
+
+                        <p class="text-3xl font-black italic text-slate-900">${h}h <span class="text-sm opacity-30">${diasTrabajados} días</span></p>
+
                         <div class="mt-4 grid grid-cols-7 gap-1">
+
                             ${generarCalendarioMes(porUsuario[usuario].dias, mes)}
+
                         </div>
+
                     </div>
+
                 `;
+
             }
+
         }
+
+
 
         function generarCalendarioMes(diasSet, mes) {
+
             let html = "";
+
             const totalDias = new Date(2026, mes + 1, 0).getDate();
+
             for(let i=1; i<=totalDias; i++) {
+
                 const activo = diasSet.has(i);
-                html += `<div class="h-4 rounded-sm ${activo ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-slate-50'} flex items-center justify-center text-[7px] font-bold ${activo ? 'text-white' : 'text-slate-200'}">${i}</div>`;
+
+                html += `<div class="h-4 rounded-sm ${activo ? 'bg-emerald-500' : 'bg-slate-50'} flex items-center justify-center text-[7px] font-bold ${activo ? 'text-white' : 'text-slate-200'}">${i}</div>`;
+
             }
+
             return html;
+
         }
+
+
 
         async function borrarFichaje(id) {
-            if(confirm("¿Estás seguro de eliminar este registro permanentemente?")) {
+
+            if(confirm("¿Eliminar este registro?")) {
+
                 await _supabase.from('fichajes').delete().eq('id', id);
+
                 cargarRegistros();
+
             }
+
         }
 
+
+
         cargarRegistros();
+
     </script>
+
 </body>
+
 </html>
