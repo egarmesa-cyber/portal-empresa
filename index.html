@@ -3,140 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZM | Portal Business</title>
+    <title>ZM | Executive Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfcfc; color: #1a1a1a; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
-        .modal-shadow { shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-        input::placeholder { color: #cbd5e1; font-weight: 500; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #0f172a; }
+        .nav-link { display: flex; align-items: center; gap: 1rem; width: 100%; padding: 0.85rem 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; color: #475569; transition: all 0.2s; }
+        .nav-link:active { background-color: #f8fafc; color: #0f172a; }
+        .nav-link svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; opacity: 0.7; }
+        .section-label { font-size: 0.65rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.15em; margin: 1.5rem 1rem 0.5rem; }
     </style>
 </head>
 <body class="antialiased">
 
-    <div id="modal-incidencia" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalIncidencia()"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-[2.5rem] p-8 shadow-2xl scale-95 transition-all">
-            <h3 class="text-xl font-extrabold italic uppercase tracking-tighter mb-2">Reportar Incidencia</h3>
-            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-6">Administración Zona Mixta</p>
-            <textarea id="incidencia-texto" rows="4" placeholder="Describe el problema (material, personal, horarios...)" 
-                class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 font-medium text-sm resize-none mb-4"></textarea>
+    <div id="modal-form" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModal()"></div>
+        <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-8 shadow-2xl">
+            <h3 id="modal-titulo" class="text-xl font-extrabold italic uppercase tracking-tighter mb-6 text-slate-900"></h3>
+            <textarea id="modal-input" rows="4" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:ring-2 focus:ring-slate-900 font-medium text-sm mb-4 resize-none"></textarea>
             <div class="flex gap-3">
-                <button onclick="cerrarModalIncidencia()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-xs uppercase tracking-widest text-slate-500">Cancelar</button>
-                <button onclick="enviarIncidencia()" class="flex-1 py-4 bg-slate-900 rounded-2xl font-bold text-xs uppercase tracking-widest text-white shadow-lg shadow-slate-200">Enviar</button>
+                <button onclick="cerrarModal()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-500">Cancelar</button>
+                <button id="modal-btn-accion" class="flex-1 py-4 bg-slate-900 rounded-xl font-bold text-[10px] uppercase tracking-widest text-white shadow-lg">Enviar</button>
             </div>
         </div>
     </div>
 
     <div id="side-menu" class="fixed inset-0 z-[80] translate-x-full transition-transform duration-300">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onclick="toggleMenu()"></div>
-        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl p-8 flex flex-col">
-            <div class="flex items-center justify-between mb-12">
-                <span class="font-black italic text-2xl tracking-tighter uppercase">Zona Mixta</span>
-                <button onclick="toggleMenu()" class="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-full text-slate-400">✕</button>
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-md" onclick="toggleMenu()"></div>
+        <div class="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-8 px-2">
+                <span class="font-black italic text-xl tracking-tighter uppercase">Zona Mixta</span>
+                <button onclick="toggleMenu()" class="text-slate-400">✕</button>
             </div>
-            <nav class="space-y-2 flex-1">
-                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Gestión Corporativa</p>
-                <button onclick="toggleMenu()" class="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl font-bold transition-all">
-                    <span class="text-xl">🏠</span> Inicio
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar">
+                <p class="section-label">General</p>
+                <button onclick="toggleMenu()" class="nav-link">
+                    <svg><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard
                 </button>
-                <button onclick="abrirDocumentos()" class="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl font-bold transition-all">
-                    <span class="text-xl">📁</span> Mis Documentos
+                <button onclick="abrirDocumentos()" class="nav-link">
+                    <svg><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Documentos
                 </button>
-                <button onclick="abrirChat()" class="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl font-bold transition-all">
-                    <span class="text-xl">💬</span> Chat de Equipo
+
+                <p class="section-label">Comunicación</p>
+                <button onclick="abrirChat()" class="nav-link">
+                    <svg><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Chat de Equipo
                 </button>
-                <button onclick="abrirModalIncidencia()" class="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl font-bold transition-all text-amber-600">
-                    <span class="text-xl">⚠️</span> Reportar Incidencia
+                <button onclick="abrirAnuncios()" class="nav-link">
+                    <svg><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Anuncios
                 </button>
-            </nav>
-            <div class="pt-8 border-t border-slate-100">
-                <button onclick="logout()" class="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-extrabold text-[10px] uppercase tracking-[0.2em]">Finalizar Sesión</button>
+
+                <p class="section-label">RRHH</p>
+                <button onclick="abrirVacaciones()" class="nav-link">
+                    <svg><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Vacaciones
+                </button>
+                <button onclick="abrirIncidencia()" class="nav-link text-amber-600">
+                    <svg><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Incidencias
+                </button>
+            </div>
+
+            <div class="mt-auto pt-6 border-t border-slate-50">
+                <button onclick="logout()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-all">Cerrar Sesión</button>
             </div>
         </div>
     </div>
 
-    <div id="login-section" class="min-h-screen flex items-center justify-center p-6 bg-[#0f172a]">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-sm text-center">
-            <img src="logo.png" class="h-20 mx-auto mb-8" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter mb-1">Zona Mixta</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal Corporativo</p>
-            <div class="space-y-3 text-left">
-                <label class="text-[9px] font-black uppercase text-slate-400 ml-4">Identificación</label>
-                <input type="text" id="username" placeholder="Tu nombre" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:ring-2 focus:ring-slate-900 mb-2">
-                <label class="text-[9px] font-black uppercase text-slate-400 ml-4">Clave de Acceso</label>
-                <input type="password" id="userpin" placeholder="PIN de 4 dígitos" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:ring-2 focus:ring-slate-900">
-                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-all mt-4">Acceder al Portal</button>
+    <div id="login-section" class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 w-full max-w-sm text-center">
+            <h1 class="text-2xl font-black italic tracking-tighter mb-10 uppercase">ZONA MIXTA</h1>
+            <div class="space-y-4 text-left">
+                <input type="text" id="username" placeholder="Usuario" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold outline-none focus:ring-1 focus:ring-slate-900">
+                <input type="password" id="userpin" placeholder="PIN" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold outline-none focus:ring-1 focus:ring-slate-900">
+                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest mt-4">Identificarse</button>
             </div>
         </div>
     </div>
 
-    <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-20">
+    <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-24">
         <header class="flex justify-between items-center py-10">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-xl shadow-xl border-2 border-white overflow-hidden">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-900 font-black text-xl border border-slate-200 overflow-hidden shadow-sm" onclick="toggleMenu()">
                     <img id="user-photo" class="w-full h-full object-cover hidden">
                     <span id="user-initial"></span>
                 </div>
                 <div>
-                    <h2 id="user-display" class="font-black italic text-xl uppercase leading-none tracking-tighter"></h2>
-                    <p class="text-[9px] text-blue-600 font-bold uppercase tracking-widest mt-1">Conexión Segura</p>
+                    <h2 id="user-display" class="font-black italic text-xl uppercase tracking-tighter"></h2>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        <span class="text-[8px] font-black uppercase text-slate-400 tracking-widest">Sistema Activo</span>
+                    </div>
                 </div>
             </div>
-            <button onclick="toggleMenu()" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 font-bold">☰</button>
+            <button onclick="toggleMenu()" class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-slate-400">☰</button>
         </header>
 
-        <main class="space-y-8">
-            <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-50 text-center">
-                <div class="grid grid-cols-2 gap-6">
-                    <button onclick="fichar('ENTRADA')" class="bg-emerald-500 text-white py-10 rounded-[2.2rem] font-black uppercase text-[11px] tracking-widest shadow-xl shadow-emerald-100 active:scale-90 transition-all">Entrada</button>
-                    <button onclick="fichar('SALIDA')" class="bg-rose-500 text-white py-10 rounded-[2.2rem] font-black uppercase text-[11px] tracking-widest shadow-xl shadow-rose-100 active:scale-90 transition-all">Salida</button>
-                </div>
-                <div id="status" class="mt-8 text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">Listo para registrar jornada</div>
-            </div>
-
+        <main class="space-y-6">
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-6 rounded-3xl border border-slate-50 shadow-sm">
-                    <p class="text-[8px] font-black text-slate-400 uppercase mb-1">Entrada Hoy</p>
-                    <p id="h-entrada" class="text-xl font-extrabold text-slate-800 tracking-tighter">--:--</p>
+                <button onclick="fichar('ENTRADA')" class="bg-slate-900 text-white py-10 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-95 transition-all">Entrada</button>
+                <button onclick="fichar('SALIDA')" class="bg-slate-100 text-slate-900 py-10 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] border border-slate-200 active:scale-95 transition-all">Salida</button>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex justify-around items-center">
+                <div class="text-center">
+                    <p class="text-[7px] font-black text-slate-300 uppercase mb-1">Registro Entrada</p>
+                    <p id="h-entrada" class="text-lg font-extrabold text-slate-800">--:--</p>
                 </div>
-                <div class="bg-white p-6 rounded-3xl border border-slate-50 shadow-sm">
-                    <p class="text-[8px] font-black text-slate-400 uppercase mb-1">Salida Hoy</p>
-                    <p id="h-salida" class="text-xl font-extrabold text-slate-800 tracking-tighter">--:--</p>
+                <div class="h-8 w-px bg-slate-100"></div>
+                <div class="text-center">
+                    <p class="text-[7px] font-black text-slate-300 uppercase mb-1">Registro Salida</p>
+                    <p id="h-salida" class="text-lg font-extrabold text-slate-800">--:--</p>
                 </div>
             </div>
 
-            <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 p-8 opacity-5 text-7xl font-black italic">ZM</div>
-                <h4 class="text-[10px] font-black opacity-40 uppercase tracking-[0.2em] mb-4">Aviso General</h4>
-                <p id="muro-texto" class="text-lg font-bold italic leading-tight">Cargando avisos oficiales...</p>
+            <div class="bg-blue-600 rounded-[2.2rem] p-8 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10 font-black italic text-4xl">ZM</div>
+                <p id="muro-texto" class="text-sm font-bold italic leading-tight text-center">Sincronizando avisos...</p>
             </div>
 
-            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center mb-6 italic">Planificación & Eventos</h3>
-                <div class="rounded-3xl overflow-hidden border border-slate-100">
-                    <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
-                    style="border: 0" width="100%" height="320" frameborder="0" scrolling="no"></iframe>
-                </div>
+            <div class="bg-white rounded-[2.2rem] p-2 border border-slate-100 shadow-sm overflow-hidden">
+                <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
+                style="border: 0" width="100%" height="320" frameborder="0" scrolling="no"></iframe>
             </div>
         </main>
     </div>
 
-    <div id="chat-window" class="fixed inset-0 z-[120] bg-white translate-y-full transition-transform duration-500 flex flex-col no-scrollbar">
-        <div class="p-8 border-b flex justify-between items-center bg-slate-900 text-white">
-            <div>
-                <h2 class="font-black italic uppercase tracking-tighter text-lg">Chat Corporativo</h2>
-                <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Canal Interno Zona Mixta</span>
-            </div>
-            <button onclick="cerrarChat()" class="text-[9px] font-black border border-white/20 px-6 py-2 rounded-full uppercase tracking-widest">Cerrar</button>
+    <div id="chat-window" class="fixed inset-0 z-[120] bg-white translate-y-full transition-transform duration-500 flex flex-col">
+        <div class="p-8 border-b flex justify-between items-center bg-white">
+            <h2 class="font-black italic uppercase tracking-tighter">Corporate Chat</h2>
+            <button onclick="cerrarChat()" class="text-[9px] font-black bg-slate-100 px-6 py-2 rounded-full uppercase">Cerrar</button>
         </div>
         <div id="chat-mensajes" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50 no-scrollbar"></div>
-        <div class="p-6 bg-white border-t flex gap-3 shadow-2xl">
-            <input type="text" id="chat-input" placeholder="Escribir mensaje..." class="flex-1 p-5 bg-slate-50 rounded-2xl outline-none font-bold text-sm border border-slate-100">
-            <button onclick="enviarMensaje()" class="bg-slate-900 text-white px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest">Enviar</button>
+        <div class="p-4 bg-white border-t flex gap-3">
+            <input type="text" id="chat-input" placeholder="Mensaje de equipo..." class="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold text-sm">
+            <button onclick="enviarMensaje()" class="bg-slate-900 text-white px-8 rounded-xl font-black uppercase text-[10px]">Enviar</button>
         </div>
     </div>
 
@@ -152,26 +152,21 @@
         async function login() {
             const name = document.getElementById('username').value.trim();
             const pin = document.getElementById('userpin').value.trim();
-            if(!name || !pin) return alert("Completa los datos");
-
             const { data } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pin).single();
             if(data) { localStorage.setItem('usuario_empresa', name); currentUser = name; mostrarApp(); }
-            else alert("Acceso denegado: Datos incorrectos.");
+            else alert("Error: Identificación incorrecta.");
         }
 
         async function mostrarApp() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('user-display').innerText = currentUser;
-            
-            const { data: user } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
-            if(user && user.foto) {
-                const img = document.getElementById('user-photo'); img.src = user.foto; img.classList.remove('hidden');
+            const { data } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
+            if(data && data.foto) {
+                document.getElementById('user-photo').src = data.foto; document.getElementById('user-photo').classList.remove('hidden');
                 document.getElementById('user-initial').classList.add('hidden');
             } else { document.getElementById('user-initial').innerText = currentUser.charAt(0).toUpperCase(); }
-
-            cargarAviso();
-            cargarHoras();
+            cargarAviso(); cargarHoras();
         }
 
         async function cargarHoras() {
@@ -186,35 +181,41 @@
         }
 
         async function fichar(tipo) {
-            document.getElementById('status').innerText = "AUTENTICANDO POSICIÓN...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const { error } = await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: `${pos.coords.latitude}, ${pos.coords.longitude}` }]);
-                if(!error) { document.getElementById('status').innerText = "✅ REGISTRO " + tipo + " COMPLETADO"; cargarHoras(); }
-            }, () => alert("Se necesita GPS."));
+                await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: `${pos.coords.latitude}, ${pos.coords.longitude}` }]);
+                cargarHoras();
+            }, () => alert("GPS Obligatorio"));
         }
 
-        // --- MODAL INCIDENCIAS (NUEVO) ---
-        function abrirModalIncidencia() {
+        // MODAL LOGIC
+        function abrirModal(titulo, callback) {
             toggleMenu();
-            const modal = document.getElementById('modal-incidencia');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-form').classList.remove('hidden');
+            document.getElementById('modal-form').classList.add('flex');
+            document.getElementById('modal-btn-accion').onclick = callback;
         }
-        function cerrarModalIncidencia() {
-            const modal = document.getElementById('modal-incidencia');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-        async function enviarIncidencia() {
-            const msg = document.getElementById('incidencia-texto').value.trim();
-            if(!msg) return alert("Escribe el reporte");
-            await _supabase.from('incidencias').insert([{ usuario: currentUser, descripcion: msg, estado: 'Pendiente' }]);
-            alert("Reporte enviado con éxito.");
-            document.getElementById('incidencia-texto').value = "";
-            cerrarModalIncidencia();
+        function cerrarModal() { document.getElementById('modal-form').classList.add('hidden'); }
+
+        function abrirIncidencia() {
+            abrirModal("Reportar Incidencia", async () => {
+                const msg = document.getElementById('modal-input').value;
+                await _supabase.from('incidencias').insert([{ usuario: currentUser, descripcion: msg }]);
+                cerrarModal(); alert("Enviado");
+            });
         }
 
-        // --- CHAT ---
+        function abrirVacaciones() {
+            abrirModal("Solicitud Vacaciones", async () => {
+                const msg = document.getElementById('modal-input').value;
+                await _supabase.from('solicitudes').insert([{ usuario: currentUser, tipo: 'Vacaciones', motivo: msg }]);
+                cerrarModal(); alert("Solicitud enviada");
+            });
+        }
+
+        function abrirAnuncios() { alert("Consultando tablón oficial..."); }
+
+        // CHAT & OTHERS
         function abrirChat() { document.getElementById('chat-window').classList.remove('translate-y-full'); cargarMensajes(); 
             _supabase.channel('public:chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => { dibujarMensaje(payload.new); }).subscribe();
         }
@@ -229,7 +230,7 @@
             const esMio = m.nombre === currentUser;
             const div = document.createElement('div');
             div.className = `flex ${esMio ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `<div class="${esMio ? 'bg-slate-900 text-white rounded-l-[1.5rem] rounded-tr-[1.5rem] shadow-xl shadow-slate-100' : 'bg-white text-slate-800 rounded-r-[1.5rem] rounded-tl-[1.5rem] border border-slate-100'} p-4 max-w-[85%] shadow-sm"><p class="text-[7px] font-black opacity-30 mb-1 uppercase tracking-widest">${m.nombre}</p><p class="font-bold text-xs leading-snug">${m.mensaje}</p></div>`;
+            div.innerHTML = `<div class="${esMio ? 'bg-slate-900 text-white rounded-l-2xl rounded-tr-2xl shadow-xl' : 'bg-white text-slate-800 rounded-r-2xl rounded-tl-2xl border border-slate-100'} p-4 max-w-[85%] shadow-sm"><p class="text-[7px] font-black opacity-30 mb-1 uppercase">${m.nombre}</p><p class="font-bold text-xs">${m.mensaje}</p></div>`;
             cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
         }
         async function enviarMensaje() {
@@ -244,7 +245,7 @@
 
         async function abrirDocumentos() {
             const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
-            if(data && data.documentos_url) window.open(data.documentos_url, '_blank'); else alert("Sin documentos asignados.");
+            if(data && data.documentos_url) window.open(data.documentos_url, '_blank'); else alert("No vinculados.");
         }
 
         function toggleMenu() { document.getElementById('side-menu').classList.toggle('translate-x-full'); }
