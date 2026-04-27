@@ -3,118 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zona Mixta Pro</title>
+    <title>Zona Mixta | Business</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .trabajando { animation: pulse-soft 2s infinite; }
-        .chat-container { height: 60vh; overflow-y: auto; scroll-behavior: smooth; }
-        body { overflow-x: hidden; touch-action: manipulation; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .menu-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 1rem; transition: all 0.2s; width: 100%; text-align: left; }
+        .menu-item:active { background-color: #f1f5f9; transform: scale(0.98); }
+        .section-title { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; margin-top: 1.5rem; }
+        .chat-container { height: 70vh; overflow-y: auto; }
+        .trabajando { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+<body class="bg-slate-50 text-slate-900">
 
     <div id="side-menu" class="fixed inset-0 z-50 translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleMenu()"></div>
-        <div class="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-8 flex flex-col">
-            <button onclick="toggleMenu()" class="text-right text-slate-400 font-black mb-10 uppercase text-[10px] tracking-widest">✕ Cerrar</button>
-            <div class="space-y-8 flex-1">
-                <div>
-                    <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Mi Perfil</h3>
-                    <button onclick="editarFoto()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
-                        <span class="bg-slate-100 p-3 rounded-xl text-xl">📸</span> Cambiar mi Foto
-                    </button>
-                </div>
-                <div>
-                    <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Comunicación</h3>
-                    <button onclick="abrirChat()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
-                        <span class="bg-blue-50 p-3 rounded-xl text-xl">💬</span> Chat de Equipo
-                    </button>
-                </div>
-                <div>
-                    <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Gestión</h3>
-                    <button onclick="abrirDocumentos()" class="flex items-center gap-4 font-bold text-slate-700 w-full transition-all active:scale-95">
-                        <span class="bg-slate-100 p-3 rounded-xl text-xl">📁</span> Mis Documentos
-                    </button>
-                </div>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="toggleMenu()"></div>
+        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl p-6 flex flex-col overflow-y-auto">
+            
+            <div class="flex justify-between items-center mb-8">
+                <span class="font-extrabold italic text-xl tracking-tighter text-slate-800">ZONA MIXTA</span>
+                <button onclick="toggleMenu()" class="p-2 bg-slate-100 rounded-full text-slate-400 text-xs font-bold">✕</button>
             </div>
-            <button onclick="logout()" class="mt-auto flex items-center gap-4 font-black text-rose-500 uppercase text-[10px] tracking-widest p-4 bg-rose-50 rounded-2xl">
-                <span>🚪</span> Salir de la App
+
+            <div class="section-title">Mi Perfil</div>
+            <button onclick="editarFoto()" class="menu-item">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">👤</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm">Gestionar Perfil</span>
+                    <span class="text-[10px] text-slate-400">Cambiar foto y datos</span>
+                </div>
             </button>
-        </div>
-    </div>
 
-    <div id="chat-window" class="fixed inset-0 z-[60] bg-white translate-y-full transition-transform duration-300 ease-in-out flex flex-col">
-        <div class="p-5 border-b flex justify-between items-center bg-blue-600 text-white shadow-lg">
-            <h2 class="font-black italic uppercase tracking-tighter flex items-center gap-2">Chat Zona Mixta</h2>
-            <button onclick="cerrarChat()" class="font-black text-[10px] bg-white/20 px-4 py-2 rounded-full uppercase">Volver</button>
-        </div>
-        <div id="chat-mensajes" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 chat-container"></div>
-        <div class="p-4 border-t bg-white flex gap-2">
-            <input type="text" id="chat-input" placeholder="Escribe al equipo..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none font-medium">
-            <button onclick="enviarMensaje()" class="bg-blue-600 text-white px-6 rounded-2xl font-black uppercase text-[10px]">Enviar</button>
-        </div>
-    </div>
+            <div class="section-title">Operaciones</div>
+            <button onclick="alert('Próximamente: Listado de tareas diarias')" class="menu-item text-slate-400">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 opacity-50">📋</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm">Mis Tareas</span>
+                    <span class="text-[10px]">Asignaciones del día</span>
+                </div>
+            </button>
 
-    <div id="login-section" class="flex items-center justify-center min-h-screen p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border border-slate-100 text-center">
-            <img src="logo.png" class="h-28 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
-            <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-2 text-slate-800">Zona Mixta</h2>
-            <p class="text-blue-600 text-[10px] mb-10 font-black uppercase tracking-[0.3em]">Acceso Personal</p>
-            <div class="space-y-4">
-                <input type="text" id="username" placeholder="Nombre de Usuario" class="w-full p-5 bg-slate-50 rounded-2xl text-center font-bold outline-none focus:ring-2 focus:ring-blue-600 border border-slate-100">
-                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all text-sm uppercase tracking-widest">ENTRAR</button>
+            <div class="section-title">Documentos</div>
+            <button onclick="abrirDocumentos()" class="menu-item">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">📁</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm">Repositorio Personal</span>
+                    <span class="text-[10px] text-slate-400">Nóminas y contratos</span>
+                </div>
+            </button>
+
+            <div class="section-title">Comunicación</div>
+            <button onclick="abrirChat()" class="menu-item">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">💬</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm">Chat de Equipo</span>
+                    <span class="text-[10px] text-slate-400">Mensajería interna</span>
+                </div>
+            </button>
+
+            <div class="mt-auto pt-8 border-t border-slate-100">
+                <button onclick="logout()" class="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-bold text-xs uppercase tracking-widest active:scale-95 transition-all">
+                    Cerrar Sesión Corporativa
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-12">
-        <header class="flex justify-between items-center py-8">
-            <div class="flex items-center gap-4 cursor-pointer" onclick="toggleMenu()">
+    <div id="login-section" class="flex items-center justify-center min-h-screen p-6 bg-slate-900">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm text-center">
+            <img src="logo.png" class="h-20 mx-auto mb-8" onerror="this.src='https://via.placeholder.com/150?text=ZM'">
+            <h2 class="text-2xl font-extrabold italic uppercase tracking-tighter mb-1 text-slate-800">Zona Mixta</h2>
+            <p class="text-[10px] mb-8 font-bold text-slate-400 uppercase tracking-widest">Portal de Empleado</p>
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="Usuario" class="w-full p-4 bg-slate-50 rounded-2xl text-center font-semibold outline-none focus:ring-2 focus:ring-blue-600">
+                <button onclick="login()" class="w-full bg-slate-800 text-white font-extrabold py-4 rounded-2xl shadow-xl active:scale-95 transition-all uppercase text-xs tracking-widest">Autenticar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-20">
+        <header class="flex justify-between items-center py-6">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="toggleMenu()">
                 <div class="relative">
-                    <div class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-2xl overflow-hidden shadow-xl ring-4 ring-white">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-xl overflow-hidden shadow-lg border-2 border-white">
                         <span id="user-initial"></span>
                         <img id="user-photo" class="hidden w-full h-full object-cover">
                     </div>
-                    <div class="absolute bottom-0 right-0 bg-emerald-500 w-5 h-5 rounded-full border-4 border-white"></div>
                 </div>
                 <div>
-                    <h1 class="text-xl font-black italic uppercase leading-none text-slate-800">Hola, <span id="user-display"></span></h1>
-                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1 italic">Toca para opciones ➔</p>
+                    <h1 class="text-lg font-extrabold italic uppercase leading-none text-slate-800"><span id="user-display"></span></h1>
+                    <p class="text-[9px] text-blue-600 font-bold uppercase tracking-widest mt-1">Panel de Control ➔</p>
                 </div>
             </div>
         </header>
 
-        <div class="bg-blue-600 rounded-[2.5rem] p-8 shadow-blue-200 shadow-2xl mb-8 text-white text-center relative overflow-hidden">
-            <h3 class="text-[10px] font-black opacity-50 uppercase mb-2 tracking-widest text-center">Aviso Dirección</h3>
-            <p id="muro-texto" class="font-bold text-lg leading-tight">¡Bienvenido al equipo!</p>
-        </div>
+        <div class="grid grid-cols-1 gap-6">
+            
+            <div class="bg-slate-900 rounded-3xl p-6 shadow-xl text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10 font-black italic text-4xl">ZM</div>
+                <h3 class="text-[9px] font-black opacity-40 uppercase mb-2 tracking-widest">Comunicado General</h3>
+                <p id="muro-texto" class="font-semibold text-base leading-snug italic">Cargando anuncios...</p>
+            </div>
 
-        <div id="cronometro-box" class="hidden bg-white rounded-[2.2rem] p-6 mb-8 border border-slate-100 shadow-sm text-center">
-            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Jornada Activa</p>
-            <div id="tiempo-transcurrido" class="text-5xl font-black text-slate-900 trabajando tracking-tighter">00:00:00</div>
-        </div>
+            <div id="cronometro-box" class="hidden bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Jornada Activa</p>
+                <div id="tiempo-transcurrido" class="text-4xl font-black text-slate-800 trabajando tracking-tighter">00:00:00</div>
+            </div>
 
-        <div class="bg-white rounded-[2.8rem] p-10 shadow-sm border border-slate-100 text-center mb-8">
-            <div id="status" class="mb-8 text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Registro de Jornada</div>
-            <div class="grid grid-cols-2 gap-6">
-                <button onclick="fichar('ENTRADA')" class="bg-emerald-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all shadow-emerald-100">ENTRADA</button>
-                <button onclick="fichar('SALIDA')" class="bg-rose-500 text-white py-10 rounded-[2.2rem] font-black text-xl shadow-lg active:scale-90 transition-all shadow-rose-100">SALIDA</button>
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 text-center">
+                <div id="status" class="mb-6 text-[10px] font-bold text-slate-300 uppercase tracking-widest italic leading-none">Seleccionar acción de fichaje</div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="fichar('ENTRADA')" class="bg-emerald-500 text-white py-8 rounded-3xl font-black text-lg shadow-lg active:scale-95 transition-all shadow-emerald-100">ENTRADA</button>
+                    <button onclick="fichar('SALIDA')" class="bg-rose-500 text-white py-8 rounded-3xl font-black text-lg shadow-lg active:scale-95 transition-all shadow-rose-100">SALIDA</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100">
+                <h3 class="text-[9px] font-black text-slate-400 uppercase mb-4 tracking-widest text-center">Planificación de Eventos</h3>
+                <div class="rounded-2xl overflow-hidden grayscale-[0.5] focus-within:grayscale-0">
+                    <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
+                            style="border: 0" width="100%" height="250" frameborder="0" scrolling="no"></iframe>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 mb-8 text-center overflow-hidden">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">Partidos y Eventos</h3>
-            <div class="rounded-3xl overflow-hidden">
-                <iframe src="https://calendar.google.com/calendar/embed?src=3478be3d2663273cc95476e4cb032667d5c7d05eba69fe8bf3aa43b73d3f45f8%40group.calendar.google.com&ctz=Europe%2FMadrid&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=AGENDA" 
-                        style="border: 0" width="100%" height="300" frameborder="0" scrolling="no"></iframe>
+    <div id="chat-window" class="fixed inset-0 z-[60] bg-white translate-y-full transition-transform duration-400 ease-in-out flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
+            <div class="flex flex-col">
+                <h2 class="font-extrabold italic uppercase tracking-tighter text-sm">Chat Interno</h2>
+                <span class="text-[8px] text-slate-400 uppercase font-bold">Zona Mixta Communications</span>
             </div>
+            <button onclick="cerrarChat()" class="text-[10px] font-bold bg-white/10 px-4 py-2 rounded-full uppercase">Regresar</button>
         </div>
-
-        <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
-            <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6 text-center italic text-blue-600">Historial reciente</h3>
-            <div id="historial-lista" class="space-y-4"></div>
+        <div id="chat-mensajes" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50 chat-container"></div>
+        <div class="p-4 border-t bg-white flex gap-2 shadow-2xl">
+            <input type="text" id="chat-input" placeholder="Escribir mensaje corporativo..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none font-medium text-sm">
+            <button onclick="enviarMensaje()" class="bg-slate-900 text-white px-6 rounded-2xl font-black uppercase text-[10px]">Enviar</button>
         </div>
     </div>
 
@@ -131,24 +159,22 @@
 
         async function login() {
             const name = document.getElementById('username').value.trim();
-            if (!name) return alert("Pon tu nombre");
-            const pinInput = prompt("PIN de seguridad:");
+            if (!name) return;
+            const pinInput = prompt("Clave de Seguridad (PIN):");
             const { data } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pinInput).single();
             if (data) { localStorage.setItem('usuario_empresa', name); currentUser = name; mostrarApp(); }
-            else { alert("Usuario o PIN incorrecto."); }
+            else { alert("Credenciales incorrectas."); }
         }
 
         async function mostrarApp() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('user-display').innerText = currentUser;
-            const { data: user } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
-            if (user && user.foto) {
-                userFoto = user.foto;
-                const img = document.getElementById('user-photo');
-                img.src = user.foto;
-                img.classList.remove('hidden');
-                document.getElementById('user-initial').classList.add('hidden');
+            const { data } = await _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single();
+            if (data && data.foto) {
+                userFoto = data.foto;
+                document.getElementById('user-photo').src = data.foto;
+                document.getElementById('user-photo').classList.remove('hidden');
             } else {
                 document.getElementById('user-initial').innerText = currentUser.charAt(0).toUpperCase();
             }
@@ -159,10 +185,9 @@
         function toggleMenu() { document.getElementById('side-menu').classList.toggle('translate-x-full'); }
 
         async function editarFoto() {
-            const link = prompt("Pega aquí el enlace de tu foto (JPG o PNG):");
+            const link = prompt("Enlace de la nueva imagen de perfil:");
             if (link) {
                 await _supabase.from('usuarios').update({ foto: link }).eq('Nombre', currentUser);
-                alert("¡Foto actualizada! Reinicia la App.");
                 location.reload();
             }
         }
@@ -189,23 +214,22 @@
             const esMio = m.nombre === currentUser;
             const div = document.createElement('div');
             div.className = `flex ${esMio ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `<div class="${esMio ? 'bg-blue-600 text-white rounded-l-3xl rounded-tr-3xl shadow-lg shadow-blue-100' : 'bg-white text-slate-800 rounded-r-3xl rounded-tl-3xl shadow-sm border border-slate-100'} p-4 max-w-[85%]"><p class="text-[8px] font-black opacity-50 mb-1 uppercase">${m.nombre}</p><p class="text-sm font-semibold">${m.mensaje}</p></div>`;
+            div.innerHTML = `<div class="${esMio ? 'bg-slate-900 text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white text-slate-800 rounded-r-2xl rounded-tl-2xl border border-slate-100'} p-4 max-w-[85%] shadow-sm"><p class="text-[7px] font-black opacity-40 mb-1 uppercase">${m.nombre}</p><p class="text-xs font-semibold">${m.mensaje}</p></div>`;
             cont.appendChild(div);
             cont.scrollTop = cont.scrollHeight;
         }
 
         async function enviarMensaje() {
             const input = document.getElementById('chat-input');
-            const texto = input.value.trim();
-            if (!texto) return;
-            await _supabase.from('chat').insert([{ nombre: currentUser, mensaje: texto, foto: userFoto }]);
+            if (!input.value.trim()) return;
+            await _supabase.from('chat').insert([{ nombre: currentUser, mensaje: input.value, foto: userFoto }]);
             input.value = "";
         }
 
         async function abrirDocumentos() {
             const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
             if (data && data.documentos_url) window.open(data.documentos_url, '_blank');
-            else alert("Tus documentos no han sido vinculados aún.");
+            else alert("Acceso restringido o documentos no disponibles.");
         }
 
         async function cargarAviso() {
@@ -214,13 +238,8 @@
         }
 
         async function cargarHistorial() {
-            const lista = document.getElementById('historial-lista');
-            const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(3);
-            if (data && data.length > 0) {
-                lista.innerHTML = data.map(f => `<div class="flex justify-between items-center bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm"><span class="text-[10px] font-black ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} uppercase">${f.Tipo}</span><span class="text-xs font-black text-slate-600">${new Date(f.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div>`).join('');
-                if (data[0].Tipo === 'ENTRADA') iniciarCronometro(data[0].created_at);
-                else { document.getElementById('cronometro-box').classList.add('hidden'); clearInterval(timerInterval); }
-            }
+            const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).order('created_at', { ascending: false }).limit(1);
+            if (data && data.length > 0 && data[0].Tipo === 'ENTRADA') iniciarCronometro(data[0].created_at);
         }
 
         function iniciarCronometro(hora) {
@@ -236,14 +255,13 @@
         }
 
         async function fichar(tipo) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "LOCALIZANDO...";
+            document.getElementById('status').innerText = "AUTENTICANDO POSICIÓN...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
                 await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: coords }]);
-                statusDiv.innerText = "REGISTRADO ✅";
-                cargarHistorial();
-            }, () => alert("GPS Obligatorio"));
+                document.getElementById('status').innerText = "REGISTRO COMPLETADO ✅";
+                setTimeout(() => location.reload(), 1500);
+            });
         }
 
         function logout() { localStorage.removeItem('usuario_empresa'); location.reload(); }
