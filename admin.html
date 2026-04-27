@@ -15,26 +15,33 @@
         <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div>
                 <h1 class="text-2xl font-black text-slate-800 italic uppercase tracking-tighter">Control Admin</h1>
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gestión de Tiempos Zona Mixta</p>
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gestión Mensual Zona Mixta</p>
             </div>
-            <button onclick="cargarRegistros()" class="bg-slate-900 text-white px-6 py-2 rounded-xl font-bold hover:bg-slate-800 transition text-xs uppercase tracking-widest">↻ Actualizar</button>
+            <div class="flex gap-2">
+                <select id="filtro-mes" onchange="cargarRegistros()" class="bg-slate-100 border-none rounded-xl text-xs font-bold p-2 outline-none">
+                    <option value="0">Enero</option><option value="1">Febrero</option>
+                    <option value="2">Marzo</option><option value="3">Abril</option>
+                    <option value="4">Mayo</option><option value="5">Junio</option>
+                    <option value="6">Julio</option><option value="7">Agosto</option>
+                    <option value="8">Septiembre</option><option value="9">Octubre</option>
+                    <option value="10">Noviembre</option><option value="11">Diciembre</option>
+                </select>
+                <button onclick="cargarRegistros()" class="bg-slate-900 text-white px-4 py-2 rounded-xl font-bold text-xs uppercase">↻</button>
+            </div>
         </header>
 
-        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2 italic">Resumen de Actividad</h3>
+        <h3 id="titulo-mes" class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2 italic text-center"></h3>
         <div id="resumen-horas" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"></div>
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-            <div class="p-4 bg-slate-50 border-b border-slate-100">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Historial Detallado</span>
-            </div>
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-white border-b border-slate-50">
+                    <tr class="bg-slate-50 border-b border-slate-50">
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Empleado</th>
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Acción</th>
-                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Fecha/Hora</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Fecha</th>
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Mapa</th>
-                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase text-center">Gestión</th>
+                        <th class="p-4 text-[10px] font-black text-slate-400 uppercase text-right">Gestión</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-cuerpo" class="text-slate-600"></tbody>
@@ -47,40 +54,49 @@
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Poner el mes actual por defecto al cargar
+        document.getElementById('filtro-mes').value = new Date().getMonth();
+
         async function cargarRegistros() {
+            const mesSeleccionado = parseInt(document.getElementById('filtro-mes').value);
+            const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            document.getElementById('titulo-mes').innerText = `Resumen de ${nombresMeses[mesSeleccionado]}`;
+
             const cuerpo = document.getElementById('tabla-cuerpo');
-            cuerpo.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-xs font-bold text-slate-400 uppercase">Sincronizando...</td></tr>';
+            cuerpo.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-xs font-bold text-slate-300">CARGANDO...</td></tr>';
 
             const { data, error } = await _supabase.from('fichajes').select('*').order('created_at', { ascending: false });
-            if (error) return alert("Error: " + error.message);
+            if (error) return;
+
+            // FILTRAR DATA POR MES
+            const dataFiltrada = data.filter(reg => new Date(reg.created_at).getMonth() === mesSeleccionado);
 
             cuerpo.innerHTML = '';
-            actualizarResumen(data);
+            actualizarResumen(dataFiltrada, mesSeleccionado);
 
-            data.forEach(reg => {
+            dataFiltrada.forEach(reg => {
                 const fila = document.createElement('tr');
                 fila.className = "border-b border-slate-50 hover:bg-slate-50 transition";
-                const fecha = new Date(reg.created_at).toLocaleString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const fechaObj = new Date(reg.created_at);
+                const fechaStr = fechaObj.toLocaleDateString([], {day:'2-digit', month:'2-digit'});
+                const horaStr = fechaObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 
-                // CORRECCIÓN UBICACIÓN
                 const mapaLink = reg.Ubicacion ? 
-                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold text-[9px] uppercase border border-blue-100">📍 Ver Mapa</a>` : 
-                    `<span class="text-[9px] text-slate-300 font-bold uppercase italic">Sin GPS</span>`;
+                    `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="text-blue-500 font-black text-[9px] uppercase">📍 Ver</a>` : 
+                    `<span class="text-[8px] text-slate-300 uppercase">No GPS</span>`;
 
                 fila.innerHTML = `
                     <td class="p-4 font-bold text-slate-800 text-sm">${reg.Usuario}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded-lg text-[9px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${reg.Tipo}</span></td>
-                    <td class="p-4 text-xs font-medium text-slate-500">${fecha}</td>
+                    <td class="p-4"><span class="px-2 py-0.5 rounded text-[8px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${reg.Tipo}</span></td>
+                    <td class="p-4 text-xs text-slate-500"><b>${fechaStr}</b> ${horaStr}</td>
                     <td class="p-4">${mapaLink}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="borrarFichaje('${reg.id}')" class="text-rose-400 hover:text-rose-600 font-bold text-[9px] uppercase">Eliminar</button>
-                    </td>
+                    <td class="p-4 text-right"><button onclick="borrarFichaje('${reg.id}')" class="text-rose-300 hover:text-rose-500 font-bold text-[9px] uppercase">Borrar</button></td>
                 `;
                 cuerpo.appendChild(fila);
             });
         }
 
-        function actualizarResumen(fichajes) {
+        function actualizarResumen(fichajes, mes) {
             const resumen = document.getElementById('resumen-horas');
             resumen.innerHTML = "";
             const porUsuario = {};
@@ -88,7 +104,7 @@
             fichajes.forEach(f => {
                 if (!porUsuario[f.Usuario]) porUsuario[f.Usuario] = { regs: [], dias: new Set() };
                 porUsuario[f.Usuario].regs.push(f);
-                porUsuario[f.Usuario].dias.add(new Date(f.created_at).toLocaleDateString());
+                porUsuario[f.Usuario].dias.add(new Date(f.created_at).getDate());
             });
 
             for (const usuario in porUsuario) {
@@ -105,35 +121,27 @@
                 resumen.innerHTML += `
                     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${usuario}</p>
-                        <div class="flex justify-between items-end">
-                            <p class="text-3xl font-black italic text-slate-900">${h}h <span class="text-sm opacity-30">acumuladas</span></p>
-                            <div class="text-right">
-                                <p class="text-[9px] font-black text-emerald-500 uppercase">${diasTrabajados} días de presencia</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-slate-50">
-                            <p class="text-[8px] font-black text-slate-300 uppercase mb-2">Presencia últimos 7 días</p>
-                            <div class="flex gap-1">
-                                ${generarMiniCalendario(porUsuario[usuario].dias)}
-                            </div>
+                        <p class="text-3xl font-black italic text-slate-900">${h}h <span class="text-sm opacity-30">${diasTrabajados} días</span></p>
+                        <div class="mt-4 grid grid-cols-7 gap-1">
+                            ${generarCalendarioMes(porUsuario[usuario].dias, mes)}
                         </div>
                     </div>
                 `;
             }
         }
 
-        function generarMiniCalendario(diasSet) {
+        function generarCalendarioMes(diasSet, mes) {
             let html = "";
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const activo = diasSet.has(d.toLocaleDateString());
-                html += `<div class="flex-1 h-6 rounded-md ${activo ? 'bg-emerald-500' : 'bg-slate-100'} flex items-center justify-center text-[8px] font-bold ${activo ? 'text-white' : 'text-slate-300'}">${d.getDate()}</div>`;
+            const totalDias = new Date(2026, mes + 1, 0).getDate();
+            for(let i=1; i<=totalDias; i++) {
+                const activo = diasSet.has(i);
+                html += `<div class="h-4 rounded-sm ${activo ? 'bg-emerald-500' : 'bg-slate-50'} flex items-center justify-center text-[7px] font-bold ${activo ? 'text-white' : 'text-slate-200'}">${i}</div>`;
             }
             return html;
         }
 
         async function borrarFichaje(id) {
-            if(confirm("¿Borrar registro?")) {
+            if(confirm("¿Eliminar este registro?")) {
                 await _supabase.from('fichajes').delete().eq('id', id);
                 cargarRegistros();
             }
