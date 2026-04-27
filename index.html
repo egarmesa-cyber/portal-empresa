@@ -74,6 +74,14 @@
             </div>
 
             <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Mi Actividad Mensual</h3>
+                    <span id="horas-totales-mes" class="text-[10px] font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full italic">0h 0m</span>
+                </div>
+                <div id="calendario-personal" class="grid grid-cols-7 gap-1"></div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                 <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4 text-center italic">Hoy</h3>
                 <div id="historial-hoy" class="space-y-3"></div>
             </div>
@@ -92,175 +100,4 @@
             <div class="flex-1 overflow-y-auto no-scrollbar">
                 <p class="section-label">General</p>
                 <button onclick="toggleMenu()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard</button>
-                <button onclick="abrirDocumentos()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Documentos</button>
-                <p class="section-label">Comunicación</p>
-                <button onclick="abrirChat()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Chat Equipo</button>
-            </div>
-            <div class="mt-auto pt-6 border-t border-slate-50"><button onclick="logout()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg">Salir</button></div>
-        </div>
-    </div>
-
-    <div id="modal-form" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModal()"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-[2.5rem] p-8 shadow-2xl text-center">
-            <h3 id="modal-titulo" class="text-lg font-black italic uppercase mb-6"></h3>
-            <textarea id="modal-input" rows="4" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:ring-1 focus:ring-slate-900 font-medium text-sm mb-4 resize-none"></textarea>
-            <div class="flex gap-3">
-                <button onclick="cerrarModal()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-[10px] uppercase text-slate-400">Cancelar</button>
-                <button id="modal-btn-accion" class="flex-1 py-4 bg-slate-900 rounded-xl font-bold text-[10px] uppercase text-white">Enviar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="chat-window" class="fixed inset-0 z-[150] bg-white translate-y-full transition-transform duration-500 flex flex-col">
-        <div class="p-8 border-b flex justify-between items-center bg-white">
-            <h2 class="font-black italic uppercase tracking-tighter">Chat Interno</h2>
-            <button onclick="cerrarChat()" class="text-[9px] font-black bg-slate-100 px-6 py-2 rounded-full uppercase">Cerrar</button>
-        </div>
-        <div id="chat-mensajes" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50"></div>
-        <div class="p-4 bg-white border-t flex gap-3">
-            <input type="text" id="chat-input" placeholder="Mensaje..." class="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold text-sm">
-            <button onclick="enviarMensaje()" class="bg-slate-900 text-white px-8 rounded-xl font-black uppercase text-[10px]">Enviar</button>
-        </div>
-    </div>
-
-    <script>
-        // CONFIGURACIÓN
-        const SUPABASE_URL = 'https://rxrgjpbxtyeypsfqmlfu.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let currentUser = localStorage.getItem('usuario_empresa');
-        let timerInterval;
-
-        // INICIO AUTOMÁTICO
-        if(currentUser) { mostrarApp(); }
-
-        async function login() {
-            const name = document.getElementById('username').value.trim();
-            const pin = document.getElementById('userpin').value.trim();
-            const btn = document.getElementById('btn-login');
-
-            if(!name || !pin) return alert("Completa usuario y PIN");
-            
-            btn.innerText = "VERIFICANDO...";
-
-            try {
-                const { data, error } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pin).single();
-                if(data) {
-                    localStorage.setItem('usuario_empresa', name);
-                    currentUser = name;
-                    mostrarApp();
-                } else {
-                    alert("Error: Nombre o PIN incorrecto.");
-                    btn.innerText = "Acceder al Portal";
-                }
-            } catch (e) {
-                alert("Error de conexión con la base de datos.");
-                btn.innerText = "Acceder al Portal";
-            }
-        }
-
-        function mostrarApp() {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('app-section').classList.remove('hidden');
-            document.getElementById('user-display').innerText = currentUser;
-            
-            _supabase.from('usuarios').select('foto').eq('Nombre', currentUser).single().then(({data}) => {
-                if(data && data.foto) {
-                    document.getElementById('user-photo').src = data.foto;
-                    document.getElementById('user-photo').classList.remove('hidden');
-                    document.getElementById('user-initial').classList.add('hidden');
-                } else {
-                    document.getElementById('user-initial').innerText = currentUser.charAt(0).toUpperCase();
-                }
-            });
-
-            cargarAviso();
-            cargarRegistrosHoy();
-        }
-
-        async function cargarRegistrosHoy() {
-            const hoy = new Date().toISOString().split('T')[0];
-            const { data } = await _supabase.from('fichajes').select('*').eq('Usuario', currentUser).gte('created_at', hoy).order('created_at', { ascending: false });
-
-            const lista = document.getElementById('historial-hoy');
-            lista.innerHTML = "";
-            const statusLabel = document.getElementById('label-status');
-            
-            if(data && data.length > 0) {
-                data.forEach(f => {
-                    const hora = new Date(f.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                    lista.innerHTML += `<div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-50">
-                        <span class="text-[9px] font-black uppercase ${f.Tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'} italic">${f.Tipo}</span>
-                        <span class="text-sm font-extrabold text-slate-800">${hora}</span>
-                    </div>`;
-                });
-
-                if(data[0].Tipo === 'ENTRADA') {
-                    iniciarTimer(data[0].created_at);
-                    statusLabel.innerHTML = `<span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span><span class="text-[8px] font-black uppercase text-emerald-500 tracking-widest">Trabajando</span>`;
-                } else {
-                    document.getElementById('contador-card').classList.add('hidden');
-                    statusLabel.innerHTML = `<span class="w-2 h-2 bg-slate-300 rounded-full"></span><span class="text-[8px] font-black uppercase text-slate-400 tracking-widest">Pausado</span>`;
-                    clearInterval(timerInterval);
-                }
-            } else {
-                lista.innerHTML = "<p class='text-[10px] text-center text-slate-300 font-bold uppercase'>Sin actividad hoy</p>";
-            }
-        }
-
-        function iniciarTimer(fecha) {
-            document.getElementById('contador-card').classList.remove('hidden');
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const diff = new Date() - new Date(fecha);
-                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-                document.getElementById('timer-display').innerText = `${h}:${m}:${s}`;
-            }, 1000);
-        }
-
-        async function fichar(tipo) {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                await _supabase.from('fichajes').insert([{ Usuario: currentUser, Tipo: tipo, Ubicacion: `${pos.coords.latitude},${pos.coords.longitude}` }]);
-                cargarRegistrosHoy();
-            }, () => alert("GPS Obligatorio"), { enableHighAccuracy: true });
-        }
-
-        // FUNCIONES EXTRA
-        function toggleMenu() { document.getElementById('side-menu').classList.toggle('translate-x-full'); }
-        function logout() { localStorage.removeItem('usuario_empresa'); location.reload(); }
-        function abrirChat() { document.getElementById('chat-window').classList.remove('translate-y-full'); cargarMensajes(); 
-            _supabase.channel('public:chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => { dibujarMensaje(payload.new); }).subscribe();
-        }
-        function cerrarChat() { document.getElementById('chat-window').classList.add('translate-y-full'); }
-        async function cargarMensajes() {
-            const { data } = await _supabase.from('chat').select('*').order('created_at', { ascending: true }).limit(50);
-            const cont = document.getElementById('chat-mensajes'); cont.innerHTML = "";
-            if(data) data.forEach(m => dibujarMensaje(m));
-        }
-        function dibujarMensaje(m) {
-            const cont = document.getElementById('chat-mensajes');
-            const esMio = m.nombre === currentUser;
-            const div = document.createElement('div');
-            div.className = `flex ${esMio ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `<div class="${esMio ? 'bg-slate-900 text-white rounded-l-2xl rounded-tr-2xl shadow-xl' : 'bg-white text-slate-800 rounded-r-2xl rounded-tl-2xl border border-slate-100'} p-4 max-w-[85%] shadow-sm"><p class="text-[7px] font-black opacity-30 mb-1 uppercase tracking-widest">${m.nombre}</p><p class="font-bold text-xs">${m.mensaje}</p></div>`;
-            cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
-        }
-        async function enviarMensaje() {
-            const input = document.getElementById('chat-input'); if(!input.value.trim()) return;
-            await _supabase.from('chat').insert([{ nombre: currentUser, mensaje: input.value }]); input.value = "";
-        }
-        async function cargarAviso() {
-            const { data } = await _supabase.from('avisos').select('mensaje').order('created_at', { ascending: false }).limit(1).single();
-            if(data) document.getElementById('muro-texto').innerText = data.mensaje;
-        }
-        async function abrirDocumentos() {
-            const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
-            if(data?.documentos_url) window.open(data.documentos_url, '_blank'); else alert("Sin documentos.");
-        }
-    </script>
-</body>
-</html>
+                <button onclick="abrirDocumentos()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
