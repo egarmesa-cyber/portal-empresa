@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZM | Executive Portal</title>
+    <title>ZM | Portal Corporativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
         .nav-link:active { background-color: #f8fafc; color: #0f172a; }
         .nav-link svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; opacity: 0.7; }
         .section-label { font-size: 0.65rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.15em; margin: 1.5rem 1rem 0.5rem; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="antialiased">
@@ -20,8 +21,8 @@
     <div id="modal-form" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModal()"></div>
         <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-8 shadow-2xl">
-            <h3 id="modal-titulo" class="text-xl font-extrabold italic uppercase tracking-tighter mb-6 text-slate-900"></h3>
-            <textarea id="modal-input" rows="4" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:ring-2 focus:ring-slate-900 font-medium text-sm mb-4 resize-none"></textarea>
+            <h3 id="modal-titulo" class="text-xl font-extrabold italic uppercase tracking-tighter mb-6 text-slate-900 text-center"></h3>
+            <textarea id="modal-input" rows="4" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:ring-1 focus:ring-slate-900 font-medium text-sm mb-4 resize-none" placeholder="Escribe aquí..."></textarea>
             <div class="flex gap-3">
                 <button onclick="cerrarModal()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-500">Cancelar</button>
                 <button id="modal-btn-accion" class="flex-1 py-4 bg-slate-900 rounded-xl font-bold text-[10px] uppercase tracking-widest text-white shadow-lg">Enviar</button>
@@ -32,56 +33,55 @@
     <div id="side-menu" class="fixed inset-0 z-[80] translate-x-full transition-transform duration-300">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-md" onclick="toggleMenu()"></div>
         <div class="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-6 flex flex-col">
-            <div class="flex items-center justify-between mb-8 px-2">
-                <span class="font-black italic text-xl tracking-tighter uppercase">Zona Mixta</span>
-                <button onclick="toggleMenu()" class="text-slate-400">✕</button>
+            <div class="flex items-center justify-center mb-8 px-2">
+                <img src="logo.png" class="h-12" onerror="this.style.display='none'">
             </div>
             
             <div class="flex-1 overflow-y-auto no-scrollbar">
                 <p class="section-label">General</p>
                 <button onclick="toggleMenu()" class="nav-link">
-                    <svg><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard
                 </button>
                 <button onclick="abrirDocumentos()" class="nav-link">
-                    <svg><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Documentos
+                    <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Documentos
                 </button>
 
                 <p class="section-label">Comunicación</p>
                 <button onclick="abrirChat()" class="nav-link">
-                    <svg><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Chat de Equipo
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Chat de Equipo
                 </button>
-                <button onclick="abrirAnuncios()" class="nav-link">
-                    <svg><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Anuncios
+                <button onclick="alert('Funcionalidad próximamente')" class="nav-link">
+                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Anuncios
                 </button>
 
-                <p class="section-label">RRHH</p>
+                <p class="section-label">Recursos Humanos</p>
                 <button onclick="abrirVacaciones()" class="nav-link">
-                    <svg><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Vacaciones
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Vacaciones
                 </button>
                 <button onclick="abrirIncidencia()" class="nav-link text-amber-600">
-                    <svg><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Incidencias
+                    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Incidencias
                 </button>
             </div>
 
             <div class="mt-auto pt-6 border-t border-slate-50">
-                <button onclick="logout()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-all">Cerrar Sesión</button>
+                <button onclick="logout()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest">Cerrar Sesión</button>
             </div>
         </div>
     </div>
 
     <div id="login-section" class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
         <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 w-full max-w-sm text-center">
-            <h1 class="text-2xl font-black italic tracking-tighter mb-10 uppercase">ZONA MIXTA</h1>
+            <img src="logo.png" class="h-20 mx-auto mb-8" onerror="this.style.display='none'">
             <div class="space-y-4 text-left">
-                <input type="text" id="username" placeholder="Usuario" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold outline-none focus:ring-1 focus:ring-slate-900">
+                <input type="text" id="username" placeholder="Nombre de usuario" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold outline-none focus:ring-1 focus:ring-slate-900">
                 <input type="password" id="userpin" placeholder="PIN" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold outline-none focus:ring-1 focus:ring-slate-900">
-                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest mt-4">Identificarse</button>
+                <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest mt-4">Acceder</button>
             </div>
         </div>
     </div>
 
     <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-24">
-        <header class="flex justify-between items-center py-10">
+        <header class="flex justify-between items-center py-8">
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-900 font-black text-xl border border-slate-200 overflow-hidden shadow-sm" onclick="toggleMenu()">
                     <img id="user-photo" class="w-full h-full object-cover hidden">
@@ -89,36 +89,40 @@
                 </div>
                 <div>
                     <h2 id="user-display" class="font-black italic text-xl uppercase tracking-tighter"></h2>
-                    <div class="flex items-center gap-1.5 mt-1">
+                    <div class="flex items-center gap-1.5 mt-0.5">
                         <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="text-[8px] font-black uppercase text-slate-400 tracking-widest">Sistema Activo</span>
+                        <span class="text-[8px] font-black uppercase text-slate-400 tracking-widest">Zona Mixta Cloud</span>
                     </div>
                 </div>
             </div>
             <button onclick="toggleMenu()" class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-slate-400">☰</button>
         </header>
 
-        <main class="space-y-6">
+        <main class="space-y-6 text-center">
+            <div class="py-2">
+                <img src="logo.png" class="h-16 mx-auto opacity-90" onerror="this.style.display='none'">
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="fichar('ENTRADA')" class="bg-slate-900 text-white py-10 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-95 transition-all">Entrada</button>
-                <button onclick="fichar('SALIDA')" class="bg-slate-100 text-slate-900 py-10 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] border border-slate-200 active:scale-95 transition-all">Salida</button>
+                <button onclick="fichar('ENTRADA')" class="bg-slate-900 text-white py-10 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] shadow-xl active:scale-95 transition-all">Entrada</button>
+                <button onclick="fichar('SALIDA')" class="bg-slate-50 text-slate-900 py-10 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] border border-slate-200 active:scale-95 transition-all">Salida</button>
             </div>
 
             <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex justify-around items-center">
                 <div class="text-center">
-                    <p class="text-[7px] font-black text-slate-300 uppercase mb-1">Registro Entrada</p>
-                    <p id="h-entrada" class="text-lg font-extrabold text-slate-800">--:--</p>
+                    <p class="text-[7px] font-black text-slate-300 uppercase mb-1 tracking-widest">Check-in</p>
+                    <p id="h-entrada" class="text-lg font-extrabold text-slate-800 tracking-tighter">--:--</p>
                 </div>
                 <div class="h-8 w-px bg-slate-100"></div>
                 <div class="text-center">
-                    <p class="text-[7px] font-black text-slate-300 uppercase mb-1">Registro Salida</p>
-                    <p id="h-salida" class="text-lg font-extrabold text-slate-800">--:--</p>
+                    <p class="text-[7px] font-black text-slate-300 uppercase mb-1 tracking-widest">Check-out</p>
+                    <p id="h-salida" class="text-lg font-extrabold text-slate-800 tracking-tighter">--:--</p>
                 </div>
             </div>
 
-            <div class="bg-blue-600 rounded-[2.2rem] p-8 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10 font-black italic text-4xl">ZM</div>
-                <p id="muro-texto" class="text-sm font-bold italic leading-tight text-center">Sincronizando avisos...</p>
+            <div class="bg-slate-900 rounded-[2.2rem] p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5 font-black italic text-4xl">ZM</div>
+                <p id="muro-texto" class="text-sm font-bold italic leading-tight">Sincronizando avisos...</p>
             </div>
 
             <div class="bg-white rounded-[2.2rem] p-2 border border-slate-100 shadow-sm overflow-hidden">
@@ -130,12 +134,12 @@
 
     <div id="chat-window" class="fixed inset-0 z-[120] bg-white translate-y-full transition-transform duration-500 flex flex-col">
         <div class="p-8 border-b flex justify-between items-center bg-white">
-            <h2 class="font-black italic uppercase tracking-tighter">Corporate Chat</h2>
+            <h2 class="font-black italic uppercase tracking-tighter">Chat Interno</h2>
             <button onclick="cerrarChat()" class="text-[9px] font-black bg-slate-100 px-6 py-2 rounded-full uppercase">Cerrar</button>
         </div>
         <div id="chat-mensajes" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50 no-scrollbar"></div>
         <div class="p-4 bg-white border-t flex gap-3">
-            <input type="text" id="chat-input" placeholder="Mensaje de equipo..." class="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold text-sm">
+            <input type="text" id="chat-input" placeholder="Mensaje..." class="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold text-sm">
             <button onclick="enviarMensaje()" class="bg-slate-900 text-white px-8 rounded-xl font-black uppercase text-[10px]">Enviar</button>
         </div>
     </div>
@@ -154,7 +158,7 @@
             const pin = document.getElementById('userpin').value.trim();
             const { data } = await _supabase.from('usuarios').select('*').eq('Nombre', name).eq('Pin', pin).single();
             if(data) { localStorage.setItem('usuario_empresa', name); currentUser = name; mostrarApp(); }
-            else alert("Error: Identificación incorrecta.");
+            else alert("Error en credenciales");
         }
 
         async function mostrarApp() {
@@ -187,7 +191,7 @@
             }, () => alert("GPS Obligatorio"));
         }
 
-        // MODAL LOGIC
+        function cerrarModal() { document.getElementById('modal-form').classList.add('hidden'); }
         function abrirModal(titulo, callback) {
             toggleMenu();
             document.getElementById('modal-titulo').innerText = titulo;
@@ -195,7 +199,6 @@
             document.getElementById('modal-form').classList.add('flex');
             document.getElementById('modal-btn-accion').onclick = callback;
         }
-        function cerrarModal() { document.getElementById('modal-form').classList.add('hidden'); }
 
         function abrirIncidencia() {
             abrirModal("Reportar Incidencia", async () => {
@@ -209,13 +212,10 @@
             abrirModal("Solicitud Vacaciones", async () => {
                 const msg = document.getElementById('modal-input').value;
                 await _supabase.from('solicitudes').insert([{ usuario: currentUser, tipo: 'Vacaciones', motivo: msg }]);
-                cerrarModal(); alert("Solicitud enviada");
+                cerrarModal(); alert("Enviada");
             });
         }
 
-        function abrirAnuncios() { alert("Consultando tablón oficial..."); }
-
-        // CHAT & OTHERS
         function abrirChat() { document.getElementById('chat-window').classList.remove('translate-y-full'); cargarMensajes(); 
             _supabase.channel('public:chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => { dibujarMensaje(payload.new); }).subscribe();
         }
@@ -230,26 +230,9 @@
             const esMio = m.nombre === currentUser;
             const div = document.createElement('div');
             div.className = `flex ${esMio ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `<div class="${esMio ? 'bg-slate-900 text-white rounded-l-2xl rounded-tr-2xl shadow-xl' : 'bg-white text-slate-800 rounded-r-2xl rounded-tl-2xl border border-slate-100'} p-4 max-w-[85%] shadow-sm"><p class="text-[7px] font-black opacity-30 mb-1 uppercase">${m.nombre}</p><p class="font-bold text-xs">${m.mensaje}</p></div>`;
+            div.innerHTML = `<div class="${esMio ? 'bg-slate-900 text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white text-slate-800 rounded-r-2xl rounded-tl-2xl border border-slate-100'} p-4 max-w-[85%] shadow-sm"><p class="text-[7px] font-black opacity-30 mb-1 uppercase">${m.nombre}</p><p class="font-bold text-xs">${m.mensaje}</p></div>`;
             cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
         }
         async function enviarMensaje() {
             const input = document.getElementById('chat-input'); if(!input.value.trim()) return;
             await _supabase.from('chat').insert([{ nombre: currentUser, mensaje: input.value }]); input.value = "";
-        }
-
-        async function cargarAviso() {
-            const { data } = await _supabase.from('avisos').select('mensaje').order('created_at', { ascending: false }).limit(1).single();
-            if(data) document.getElementById('muro-texto').innerText = data.mensaje;
-        }
-
-        async function abrirDocumentos() {
-            const { data } = await _supabase.from('usuarios').select('documentos_url').eq('Nombre', currentUser).single();
-            if(data && data.documentos_url) window.open(data.documentos_url, '_blank'); else alert("No vinculados.");
-        }
-
-        function toggleMenu() { document.getElementById('side-menu').classList.toggle('translate-x-full'); }
-        function logout() { localStorage.removeItem('usuario_empresa'); location.reload(); }
-    </script>
-</body>
-</html>
