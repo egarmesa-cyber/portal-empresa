@@ -43,7 +43,7 @@
     </div>
 
     <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-24">
-        <header class="flex justify-between items-center py-8">
+        <header class="flex justify-between items-center py-8 text-slate-900">
             <div class="flex items-center gap-4" onclick="toggleMenu()">
                 <div class="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-xl border-2 border-white shadow-lg overflow-hidden">
                     <img id="user-photo" class="w-full h-full object-cover hidden">
@@ -75,13 +75,13 @@
 
             <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Mi Actividad Mensual</h3>
-                    <span id="horas-totales-mes" class="text-[10px] font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full italic">0h 0m</span>
+                    <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Asistencia Mensual</h3>
+                    <span id="horas-mes" class="text-[10px] font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-full italic">0h 0m</span>
                 </div>
                 <div id="calendario-personal" class="grid grid-cols-7 gap-1"></div>
             </div>
 
-            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm text-slate-900">
                 <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4 text-center italic">Hoy</h3>
                 <div id="historial-hoy" class="space-y-3"></div>
             </div>
@@ -100,4 +100,4 @@
             <div class="flex-1 overflow-y-auto no-scrollbar">
                 <p class="section-label">General</p>
                 <button onclick="toggleMenu()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard</button>
-                <button onclick="abrirDocumentos()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                <button onclick="abrirDocumentos()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Document
