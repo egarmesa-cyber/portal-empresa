@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zona Mixta | Portal</title>
+    <title>Zona Mixta | Portal Premium</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,31 +19,40 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .nav-link { display: flex; align-items: center; gap: 1rem; width: 100%; padding: 0.85rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; font-weight: 700; color: #475569; transition: all 0.2s; }
+        .nav-link:active { background-color: #f8fafc; color: #0f172a; transform: scale(0.98); }
         .nav-link svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; }
         .section-label { font-size: 0.6rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.15em; margin: 1.5rem 1rem 0.5rem; }
     </style>
 </head>
 <body class="antialiased">
 
+    <div id="modal-form" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModal()"></div>
+        <div class="relative w-full max-w-sm bg-white rounded-[2.5rem] p-8 shadow-2xl">
+            <h3 id="modal-titulo" class="text-lg font-black italic uppercase tracking-tighter mb-6 text-center text-slate-900"></h3>
+            <textarea id="modal-input" rows="4" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:ring-1 focus:ring-slate-900 font-medium text-sm mb-4 resize-none" placeholder="Escribe aquí..."></textarea>
+            <div class="flex gap-3">
+                <button onclick="cerrarModal()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-400">Cancelar</button>
+                <button id="modal-btn-accion" class="flex-1 py-4 bg-slate-900 rounded-xl font-bold text-[10px] uppercase tracking-widest text-white shadow-lg">Enviar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="login-section" class="min-h-screen flex items-center justify-center p-6 bg-white transition-opacity duration-500">
         <div class="w-full max-w-sm text-center">
-            <img src="logo.png" class="h-20 mx-auto mb-10" id="login-logo">
+            <img src="logo.png" class="h-24 mx-auto mb-10" onerror="this.style.display='none'">
             <div class="space-y-4 text-left">
-                <div>
-                    <label class="text-[9px] font-black uppercase text-slate-300 ml-2 tracking-widest italic">Identificación</label>
-                    <input type="text" id="username" placeholder="Nombre exacto" class="w-full p-4 bg-slate-50 border border-slate-100 font-bold rounded-xl outline-none focus:ring-1 focus:ring-slate-900 mt-1">
-                </div>
-                <div>
-                    <label class="text-[9px] font-black uppercase text-slate-300 ml-2 tracking-widest italic">PIN Corporativo</label>
-                    <input type="password" id="userpin" placeholder="••••" class="w-full p-4 bg-slate-50 border border-slate-100 font-bold rounded-xl outline-none focus:ring-1 focus:ring-slate-900 mt-1">
-                </div>
-                <button onclick="login()" id="btn-login" class="w-full bg-slate-900 text-white font-black py-5 rounded-xl uppercase text-[10px] tracking-widest mt-6 shadow-xl active:scale-95 transition-all">Acceder al Portal</button>
+                <label class="text-[9px] font-black uppercase text-slate-300 ml-2 tracking-widest italic">Identificación</label>
+                <input type="text" id="username" placeholder="Nombre de usuario" class="w-full p-4 bg-slate-50 border border-slate-100 font-bold rounded-xl outline-none focus:ring-1 focus:ring-slate-900">
+                <label class="text-[9px] font-black uppercase text-slate-300 ml-2 tracking-widest italic">PIN Corporativo</label>
+                <input type="password" id="userpin" placeholder="••••" class="w-full p-4 bg-slate-50 border border-slate-100 font-bold rounded-xl outline-none focus:ring-1 focus:ring-slate-900">
+                <button onclick="login()" id="btn-login" class="w-full bg-slate-900 text-white font-black py-5 rounded-xl uppercase text-[10px] tracking-widest mt-6 shadow-xl active:scale-95 transition-all">Acceder al Sistema</button>
             </div>
         </div>
     </div>
 
     <div id="app-section" class="hidden max-w-md mx-auto p-4 pb-24">
-        <header class="flex justify-between items-center py-8 text-slate-900">
+        <header class="flex justify-between items-center py-8">
             <div class="flex items-center gap-4" onclick="toggleMenu()">
                 <div class="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-xl border-2 border-white shadow-lg overflow-hidden">
                     <img id="user-photo" class="w-full h-full object-cover hidden">
@@ -61,10 +70,11 @@
         </header>
 
         <main class="space-y-6">
-            <img src="logo.png" class="h-14 mx-auto opacity-90 py-2">
+            <img src="logo.png" class="h-14 mx-auto opacity-80 py-2" onerror="this.style.display='none'">
 
             <div id="contador-card" class="hidden bg-slate-900 rounded-[2.5rem] p-8 text-white text-center shadow-2xl relative overflow-hidden">
-                <p class="text-[9px] font-black opacity-40 uppercase tracking-widest mb-2 italic">Jornada Activa</p>
+                <div class="absolute top-0 right-0 p-4 opacity-5 text-4xl font-black italic uppercase">Working</div>
+                <p class="text-[9px] font-black opacity-40 uppercase tracking-widest mb-2 italic">Tiempo de Jornada Actual</p>
                 <div id="timer-display" class="text-5xl font-black tracking-tighter trabajando">00:00:00</div>
             </div>
 
@@ -75,15 +85,19 @@
 
             <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Asistencia Mensual</h3>
-                    <span id="horas-mes" class="text-[10px] font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-full italic">0h 0m</span>
+                    <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Mi Asistencia Mensual</h3>
+                    <span id="horas-mes" class="text-[10px] font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-full italic text-slate-900">0h 0m</span>
                 </div>
                 <div id="calendario-personal" class="grid grid-cols-7 gap-1"></div>
             </div>
 
-            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm text-slate-900">
-                <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4 text-center italic">Hoy</h3>
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <h3 class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4 text-center italic text-slate-900">Hoy</h3>
                 <div id="historial-hoy" class="space-y-3"></div>
+            </div>
+
+            <div class="bg-slate-900 rounded-[2.2rem] p-8 text-white shadow-xl relative overflow-hidden text-center">
+                <p id="muro-texto" class="text-sm font-bold italic leading-tight">Cargando avisos oficiales...</p>
             </div>
 
             <div class="bg-white rounded-[2.2rem] p-2 border border-slate-100 shadow-sm overflow-hidden">
@@ -93,11 +107,14 @@
         </main>
     </div>
 
-    <div id="side-menu" class="fixed inset-0 z-[120] translate-x-full transition-transform duration-300">
-        <div class="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onclick="toggleMenu()"></div>
-        <div class="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-6 flex flex-col">
-            <div class="flex items-center justify-center mb-8"><img src="logo.png" class="h-10"></div>
-            <div class="flex-1 overflow-y-auto no-scrollbar">
-                <p class="section-label">General</p>
-                <button onclick="toggleMenu()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard</button>
-                <button onclick="abrirDocumentos()" class="nav-link"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Document
+    <div id="chat-window" class="fixed inset-0 z-[150] bg-white translate-y-full transition-transform duration-500 flex flex-col">
+        <div class="p-8 border-b flex justify-between items-center bg-white shadow-sm">
+            <div>
+                <h2 class="font-black italic uppercase tracking-tighter text-lg text-slate-900">Chat de Equipo</h2>
+                <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Internal Communications</span>
+            </div>
+            <button onclick="cerrarChat()" class="text-[9px] font-black bg-slate-100 px-6 py-2 rounded-full uppercase text-slate-900">Cerrar</button>
+        </div>
+        <div id="chat-mensajes" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50 no-scrollbar"></div>
+        <div class="p-4 bg-white border-t flex gap-3 shadow-2xl">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." class="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold text-sm text-slate-90
