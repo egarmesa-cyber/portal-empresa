@@ -40,7 +40,7 @@
         <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div>
                 <h1 class="text-2xl font-black text-slate-800 italic uppercase tracking-tighter">Control Admin</h1>
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gestión Integral Zona Mixta</p>
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gestión de Jornadas Zona Mixta</p>
             </div>
             <div class="flex gap-2">
                 <select id="filtro-mes" onchange="cargarRegistros()" class="bg-slate-100 border-none rounded-xl text-xs font-bold p-2 outline-none">
@@ -63,7 +63,7 @@
                     <tr class="bg-slate-50 border-b border-slate-100 text-slate-400">
                         <th class="p-4 text-[10px] font-black uppercase">Empleado</th>
                         <th class="p-4 text-[10px] font-black uppercase">Acción</th>
-                        <th class="p-4 text-[10px] font-black uppercase">Fecha / Ubicación</th>
+                        <th class="p-4 text-[10px] font-black uppercase">Fecha / GPS</th>
                         <th class="p-4 text-[10px] font-black uppercase text-right">Gestión</th>
                     </tr>
                 </thead>
@@ -77,18 +77,26 @@
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Inicializar el filtro en el mes actual
         document.getElementById('filtro-mes').value = new Date().getMonth();
 
         async function cargarRegistros() {
             const mesSeleccionado = parseInt(document.getElementById('filtro-mes').value);
             const cuerpo = document.getElementById('tabla-cuerpo');
-            cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-xs italic text-slate-300">Cargando datos...</td></tr>';
+            cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-xs italic text-slate-300">Cargando registros...</td></tr>';
 
             const { data, error } = await _supabase.from('fichajes').select('*').order('created_at', { ascending: false });
-            if (error) return;
+            
+            if (error) {
+                console.error(error);
+                cuerpo.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-400">Error al conectar</td></tr>';
+                return;
+            }
 
+            // Filtrar por mes seleccionado
             const dataFiltrada = data.filter(reg => new Date(reg.created_at).getMonth() === mesSeleccionado);
             cuerpo.innerHTML = '';
+            
             actualizarResumen(dataFiltrada, mesSeleccionado);
 
             dataFiltrada.forEach(reg => {
@@ -96,16 +104,16 @@
                 fila.className = "border-b border-slate-50 hover:bg-slate-50 transition";
                 const fechaStr = new Date(reg.created_at).toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
                 
-                // BOTÓN DE MAPA RECUPERADO
+                // Enlace GPS
                 const mapaLink = reg.Ubicacion ? 
                     `<a href="https://www.google.com/maps?q=${reg.Ubicacion}" target="_blank" class="text-blue-500 hover:text-blue-700 font-bold ml-2">📍</a>` : 
-                    `<span class="opacity-20 ml-2">📍</span>`;
+                    `<span class="opacity-10 ml-2">📍</span>`;
 
                 fila.innerHTML = `
                     <td class="p-4 font-bold text-slate-800 text-sm">${reg.Usuario}</td>
                     <td class="p-4"><span class="px-2 py-0.5 rounded text-[8px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${reg.Tipo}</span></td>
                     <td class="p-4 text-xs text-slate-500">${fechaStr} ${mapaLink}</td>
-                    <td class="p-4 text-right flex justify-end gap-2">
+                    <td class="p-4 text-right flex justify-end gap-3">
                         <button onclick="abrirEdit('${reg.id}', '${reg.created_at}', '${reg.Tipo}')" class="text-blue-400 hover:text-blue-600 font-bold text-[9px] uppercase">Editar</button>
                         <button onclick="borrarFichaje('${reg.id}')" class="text-rose-300 hover:text-rose-500 font-bold text-[9px] uppercase">Borrar</button>
                     </td>
@@ -125,8 +133,79 @@
             document.getElementById('modal-edit').classList.add('flex');
         }
 
-        function cerrarEdit() { document.getElementById('modal-edit').classList.add('hidden'); }
+        function cerrarEdit() {
+            document.getElementById('modal-edit').classList.add('hidden');
+        }
 
         async function guardarCambios() {
             const id = document.getElementById('edit-id').value;
-            const nuevaFecha = new Date(document.getElementById('edit-fecha').value
+            const nuevaFecha = new Date(document.getElementById('edit-fecha').value).toISOString();
+            const nuevoTipo = document.getElementById('edit-tipo').value;
+
+            const { error } = await _supabase.from('fichajes').update({ 
+                created_at: nuevaFecha, 
+                Tipo: nuevoTipo 
+            }).eq('id', id);
+
+            if (!error) {
+                cerrarEdit();
+                cargarRegistros();
+            } else {
+                alert("Error al actualizar");
+            }
+        }
+
+        // --- CÁLCULO DE HORAS Y CALENDARIO ---
+        function actualizarResumen(fichajes, mes) {
+            const resumen = document.getElementById('resumen-horas');
+            resumen.innerHTML = "";
+            const porUsuario = {};
+
+            fichajes.forEach(f => {
+                if (!porUsuario[f.Usuario]) porUsuario[f.Usuario] = { regs: [], dias: new Set() };
+                porUsuario[f.Usuario].regs.push(f);
+                porUsuario[f.Usuario].dias.add(new Date(f.created_at).getDate());
+            });
+
+            for (const usuario in porUsuario) {
+                let ms = 0;
+                const regs = porUsuario[usuario].regs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+                for(let i=0; i<regs.length; i++) {
+                    if(regs[i].Tipo === 'ENTRADA' && regs[i+1] && regs[i+1].Tipo === 'SALIDA') {
+                        ms += (new Date(regs[i+1].created_at) - new Date(regs[i].created_at));
+                        i++;
+                    }
+                }
+                resumen.innerHTML += `
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${usuario}</p>
+                        <p class="text-3xl font-black italic text-slate-900">${Math.floor(ms/3600000)}h ${Math.floor((ms%3600000)/60000)}m</p>
+                        <div class="mt-4 grid grid-cols-7 gap-1">
+                            ${generarCalendarioMes(porUsuario[usuario].dias, mes)}
+                        </div>
+                    </div>`;
+            }
+        }
+
+        function generarCalendarioMes(diasSet, mes) {
+            let html = "";
+            const totalDias = new Date(new Date().getFullYear(), mes + 1, 0).getDate();
+            for(let i=1; i<=totalDias; i++) {
+                const activo = diasSet.has(i);
+                html += `<div class="h-4 rounded-sm ${activo ? 'bg-emerald-500' : 'bg-slate-50'} flex items-center justify-center text-[7px] font-bold ${activo ? 'text-white' : 'text-slate-200'}">${i}</div>`;
+            }
+            return html;
+        }
+
+        async function borrarFichaje(id) {
+            if(confirm("¿Estás seguro de eliminar este fichaje?")) {
+                const { error } = await _supabase.from('fichajes').delete().eq('id', id);
+                if(!error) cargarRegistros();
+            }
+        }
+
+        // Carga inicial
+        cargarRegistros();
+    </script>
+</body>
+</html>
