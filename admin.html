@@ -11,31 +11,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen p-4">
 
-    <div id="modal-edit" class="fixed inset-0 z-[300] hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarEdit()"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-8 shadow-2xl">
-            <h3 class="text-lg font-black uppercase mb-6 text-slate-900 italic">Editar Registro</h3>
-            <div class="space-y-4">
-                <input type="hidden" id="edit-id">
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Fecha y Hora</label>
-                    <input type="datetime-local" id="edit-fecha" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none font-bold text-sm text-slate-900">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Tipo de Marcaje</label>
-                    <select id="edit-tipo" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none font-bold text-sm text-slate-900">
-                        <option value="ENTRADA">ENTRADA</option>
-                        <option value="SALIDA">SALIDA</option>
-                    </select>
-                </div>
-                <div class="flex gap-3 mt-6">
-                    <button onclick="cerrarEdit()" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-xs uppercase text-slate-400">Cancelar</button>
-                    <button onclick="guardarCambios()" class="flex-1 py-3 bg-slate-900 rounded-xl font-bold text-xs uppercase text-white shadow-lg">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div>
@@ -61,7 +36,7 @@
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100">
+                    <tr class="bg-slate-50 border-b border-slate-50">
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Empleado</th>
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Acción</th>
                         <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Fecha</th>
@@ -79,6 +54,7 @@
         const SUPABASE_KEY = 'sb_publishable_X2fBCNmVTPmgiPND_RrzOQ_8FpULiOm';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Poner el mes actual por defecto al cargar
         document.getElementById('filtro-mes').value = new Date().getMonth();
 
         async function cargarRegistros() {
@@ -92,6 +68,7 @@
             const { data, error } = await _supabase.from('fichajes').select('*').order('created_at', { ascending: false });
             if (error) return;
 
+            // FILTRAR DATA POR MES
             const dataFiltrada = data.filter(reg => new Date(reg.created_at).getMonth() === mesSeleccionado);
 
             cuerpo.innerHTML = '';
@@ -113,46 +90,10 @@
                     <td class="p-4"><span class="px-2 py-0.5 rounded text-[8px] font-black ${reg.Tipo === 'ENTRADA' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${reg.Tipo}</span></td>
                     <td class="p-4 text-xs text-slate-500"><b>${fechaStr}</b> ${horaStr}</td>
                     <td class="p-4">${mapaLink}</td>
-                    <td class="p-4 text-right flex justify-end gap-2">
-                        <button onclick="abrirEdit('${reg.id}', '${reg.created_at}', '${reg.Tipo}')" class="text-blue-500 hover:text-blue-700 font-bold text-[9px] uppercase">Editar</button>
-                        <button onclick="borrarFichaje('${reg.id}')" class="text-rose-300 hover:text-rose-500 font-bold text-[9px] uppercase">Borrar</button>
-                    </td>
+                    <td class="p-4 text-right"><button onclick="borrarFichaje('${reg.id}')" class="text-rose-300 hover:text-rose-500 font-bold text-[9px] uppercase">Borrar</button></td>
                 `;
                 cuerpo.appendChild(fila);
             });
-        }
-
-        // FUNCIONES DE EDICIÓN
-        function abrirEdit(id, fecha, tipo) {
-            document.getElementById('edit-id').value = id;
-            const d = new Date(fecha);
-            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-            document.getElementById('edit-fecha').value = d.toISOString().slice(0, 16);
-            document.getElementById('edit-tipo').value = tipo;
-            document.getElementById('modal-edit').classList.remove('hidden');
-            document.getElementById('modal-edit').classList.add('flex');
-        }
-
-        function cerrarEdit() {
-            document.getElementById('modal-edit').classList.add('hidden');
-        }
-
-        async function guardarCambios() {
-            const id = document.getElementById('edit-id').value;
-            const nuevaFecha = new Date(document.getElementById('edit-fecha').value).toISOString();
-            const nuevoTipo = document.getElementById('edit-tipo').value;
-
-            const { error } = await _supabase.from('fichajes').update({ 
-                created_at: nuevaFecha, 
-                Tipo: nuevoTipo 
-            }).eq('id', id);
-
-            if (!error) {
-                cerrarEdit();
-                cargarRegistros();
-            } else {
-                alert("Error al actualizar");
-            }
         }
 
         function actualizarResumen(fichajes, mes) {
@@ -175,10 +116,38 @@
                     }
                 }
                 const h = Math.floor(ms/3600000);
-                const m = Math.floor((ms % 3600000) / 60000);
                 const diasTrabajados = porUsuario[usuario].dias.size;
 
                 resumen.innerHTML += `
                     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${usuario}</p>
-                        <p class="text-3xl font-black italic text-slate-900">${h}h ${m}m <span class="text-sm opacity-30">(${diasTrabajados} días
+                        <p class="text-3xl font-black italic text-slate-900">${h}h <span class="text-sm opacity-30">${diasTrabajados} días</span></p>
+                        <div class="mt-4 grid grid-cols-7 gap-1">
+                            ${generarCalendarioMes(porUsuario[usuario].dias, mes)}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function generarCalendarioMes(diasSet, mes) {
+            let html = "";
+            const totalDias = new Date(2026, mes + 1, 0).getDate();
+            for(let i=1; i<=totalDias; i++) {
+                const activo = diasSet.has(i);
+                html += `<div class="h-4 rounded-sm ${activo ? 'bg-emerald-500' : 'bg-slate-50'} flex items-center justify-center text-[7px] font-bold ${activo ? 'text-white' : 'text-slate-200'}">${i}</div>`;
+            }
+            return html;
+        }
+
+        async function borrarFichaje(id) {
+            if(confirm("¿Eliminar este registro?")) {
+                await _supabase.from('fichajes').delete().eq('id', id);
+                cargarRegistros();
+            }
+        }
+
+        cargarRegistros();
+    </script>
+</body>
+</html>
